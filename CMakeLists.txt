@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 find_package(OpenSSL)
 
-include_directories($OPENSSL_INCLUDE_DIR)
+include_directories(${OPENSSL_INCLUDE_DIR})
 
 add_executable(task3 ${SOURCE_FILES} task3.cpp)
 
