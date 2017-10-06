@@ -3,6 +3,8 @@ project(Lab2)
 
 set(CMAKE_CXX_STANDARD 11)
 
+set(OPENSSL_INCLUDE_DIR  /usr/local/opt/openssl ..)
+
 find_package(OpenSSL)
 
 include_directories(${OPENSSL_INCLUDE_DIR})
