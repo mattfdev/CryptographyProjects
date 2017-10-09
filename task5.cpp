@@ -3,9 +3,12 @@
 #include <fstream>
 
 
+
 using namespace std;
 
 char SALT[3] = "xx";
+char passwd_file[] = "passwd";
+string delim = ":";
 
 bool password_requirments_passed(string password) {
     if (password.length() > 12) {
@@ -18,17 +21,29 @@ bool password_requirments_passed(string password) {
     }
     return true;
 }
-char* encrypt_password(string password) {
+//Encrypt supplied password and return hash
+char* encrypt_password(char* password) {
 
 }
 
-bool doesUserExist(fstream passwdFile) {
-
+// Check if user exists in passwd file
+bool check_user_exists(string inputted_user) {
+    ifstream user_lookupFile(passwd_file);
+    string user_credential_details, user_name;
+    while (getline(user_lookupFile, user_credential_details)) {
+        //cout << "Line is " << user_credential_details << endl;
+        user_name = user_credential_details.substr(0, user_credential_details.find(delim));
+        //cout << "username = " << user_name << endl;
+        if (user_name == inputted_user) {
+            return true;
+        }
+    }
+    return false;
 }
 
 int main(int argc, char *argv[]) {
     srand(time(nullptr) );
-    string user_account, password, user_credential_details;
+    string user_account, password;
     bool does_user_exists = false;
     int bad_password_counter = 0, group_id = 1005, maximum_password_attempts, user_id;
     user_id = rand() % 100 + 1000;
@@ -44,15 +59,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Open passwd file, or create if does not exist
-    char filename[] = "passwd";
     fstream appendFileToWorkWith;
-    appendFileToWorkWith.open(filename, std::fstream::in | std::fstream::out | std::fstream::app);
+    appendFileToWorkWith.open(passwd_file, std::fstream::in | std::fstream::out | std::fstream::app);
     // If file does not exist, Create new file
     if (!appendFileToWorkWith) {
         cout << "passwd file doesnot exist yet, creating one now.";
-        appendFileToWorkWith.open(filename,  fstream::in | fstream::out | fstream::trunc);
-        //appendFileToWorkWith <<"\n";
+        appendFileToWorkWith.open(passwd_file,  fstream::in | fstream::out | fstream::trunc);
     }
+    appendFileToWorkWith.close();
 
     cout << "Please input your user id" << endl;
     cin >> user_account;
@@ -61,10 +75,8 @@ int main(int argc, char *argv[]) {
         cout << "Please input your user id" << endl;
         cin >> user_account;
     }
+    does_user_exists = check_user_exists(user_account);
 
-    //UserLookup
-    //getline(appendFileToWorkWith, user_credential_details);
-    //cout << user_credential_details << endl;
 
     if (does_user_exists) {
         cout << "Input your password " << endl;
@@ -82,6 +94,7 @@ int main(int argc, char *argv[]) {
         // Good password continue
     } else {
         //Create new user in the passwd file.
+        appendFileToWorkWith.open(passwd_file, std::fstream::in | std::fstream::out | std::fstream::app);
         cout << "No match found. Creating new profile" << endl;
         cout << "Please enter a password: " << endl;
         cin >> password;
@@ -89,11 +102,11 @@ int main(int argc, char *argv[]) {
             cout << "Please enter a password: " << endl;
             cin >> password;
         }
-        appendFileToWorkWith << user_account << ":" << password << ":" << user_id << ":" << group_id << ":" << "CrptX user" << ":" << "/cryptx" << ":" << "/bin/bash" << endl;
+        appendFileToWorkWith << user_account << ":" << password << ":" << user_id << ":" << group_id << ":" << "CrptX user" << ":" << "/cryptx" << ":" << "/bin/bash" << "\n";
         cout << "A new profile has been created for you." << endl;
+        appendFileToWorkWith.close();
     }
 
     cout << "Login Succesful" << endl;
-    appendFileToWorkWith.close();
     return 0;
 }
