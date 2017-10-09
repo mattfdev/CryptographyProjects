@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     for(int i = 0; i < md_len; i++)  {
         printf("%02x", md_value[i]);
     }
-    cout << endl << "These two files have 8 diffrent bits (1 byte)";
+    cout << endl << "These two files have 8 different bits (1 byte)";
 
     inFile.close();
     return 0;
