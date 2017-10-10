@@ -20,3 +20,5 @@ target_link_libraries(task3 ${OPENSSL_LIBRARIES})
 target_link_libraries(task4 ${OPENSSL_LIBRARIES})
 
 target_link_libraries(task5 ${OPENSSL_LIBRARIES})
+
+target_link_libraries(task5 ${lcrypt})
