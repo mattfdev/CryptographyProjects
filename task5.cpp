@@ -21,13 +21,14 @@ bool password_requirments_passed(string password) {
     }
     return true;
 }
+
 //Encrypt supplied password and return hash
 char* encrypt_password(char* password) {
 
 }
 
 // Check if user exists in passwd file
-bool check_user_exists(string inputted_user) {
+string check_user_exists(string inputted_user) {
     ifstream user_lookupFile(passwd_file);
     string user_credential_details, user_name;
     while (getline(user_lookupFile, user_credential_details)) {
@@ -35,16 +36,15 @@ bool check_user_exists(string inputted_user) {
         user_name = user_credential_details.substr(0, user_credential_details.find(delim));
         //cout << "username = " << user_name << endl;
         if (user_name == inputted_user) {
-            return true;
+            return user_credential_details;
         }
     }
-    return false;
+    return "";
 }
 
 int main(int argc, char *argv[]) {
     srand(time(nullptr) );
-    string user_account, password;
-    bool does_user_exists = false;
+    string user_account, password, does_user_exist, database_password;
     int bad_password_counter = 0, group_id = 1005, maximum_password_attempts, user_id;
     user_id = rand() % 100 + 1000;
 
@@ -75,23 +75,24 @@ int main(int argc, char *argv[]) {
         cout << "Please input your user id" << endl;
         cin >> user_account;
     }
-    does_user_exists = check_user_exists(user_account);
+    does_user_exist = check_user_exists(user_account);
 
-
-    if (does_user_exists) {
+    if (!does_user_exist.empty()) {
         cout << "Input your password " << endl;
         cin >> password;
-        while (!password_requirments_passed(password)) {
+        // Find the password of the user in the passwd file and save it for future comparison.
+        does_user_exist.erase(0, does_user_exist.find(delim) + delim.length());
+        database_password = does_user_exist.substr(0, does_user_exist.find(delim));
+
+        while (!password_requirments_passed(password) || password != database_password) {
             bad_password_counter++;
             if (bad_password_counter >= maximum_password_attempts) {
                 cout << "Too many unsuccessful attempts, exiting program";
                 return 1;
             }
-            cout << "Input your password " << endl;
+            cout << "Incorrect password, input your password again: " << endl;
             cin >> password;
-            // Do password lookup here
         }
-        // Good password continue
     } else {
         //Create new user in the passwd file.
         appendFileToWorkWith.open(passwd_file, std::fstream::in | std::fstream::out | std::fstream::app);
