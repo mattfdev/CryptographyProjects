@@ -1,12 +1,25 @@
+#define _XOPEN_SOURCE
+
 #include <iostream>
 #include <openssl/evp.h>
+#include <iostream>
+#include <iomanip>
 #include <fstream>
+#include <string>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <cstring>
+#include <unistd.h>
+#include <crypt.h>
+
+
 
 
 
 using namespace std;
 
-char SALT[3] = "xx";
+char SALT[3] = "xx"; //When running johnTester, this line is changed to: char SALT[10] = "xxxxxxxxx"
 char passwd_file[] = "passwd";
 string delim = ":";
 
@@ -24,7 +37,8 @@ bool password_requirments_passed(string password) {
 
 //Encrypt supplied password and return hash
 char* encrypt_password(char* password) {
-
+	
+	return crypt(password, SALT);
 }
 
 // Check if user exists in passwd file
@@ -43,18 +57,18 @@ string check_user_exists(string inputted_user) {
 }
 
 int main(int argc, char *argv[]) {
-    srand(time(nullptr) );
+    srand(time(0) );
     string user_account, password, does_user_exist, database_password;
     int bad_password_counter = 0, group_id = 1005, maximum_password_attempts, user_id;
     user_id = rand() % 100 + 1000;
 
     if (argc != 2) {
-        cout << "Incorrect number of arguments sent the program, please supply a maximum amount of password attempts argument";
+        cout << "Incorrect number of arguments sent the program, please supply a maximum amount of password attempts argument\n";
         return 1;
     }
     maximum_password_attempts = atoi(argv[1]);
     if (maximum_password_attempts == 0) {
-        cout << "Invalid max password attempts # inputted, please re-run the program with the correct argument supplied";
+        cout << "Invalid max password attempts # inputted, please re-run the program with the correct argument supplied\n";
         return 1;
     }
 
@@ -83,15 +97,16 @@ int main(int argc, char *argv[]) {
         // Find the password of the user in the passwd file and save it for future comparison.
         does_user_exist.erase(0, does_user_exist.find(delim) + delim.length());
         database_password = does_user_exist.substr(0, does_user_exist.find(delim));
-
-        while (!password_requirments_passed(password) || password != database_password) {
+        while (!password_requirments_passed(password) || encrypt_password(strdup(password.c_str())) != database_password) {
             bad_password_counter++;
             if (bad_password_counter >= maximum_password_attempts) {
-                cout << "Too many unsuccessful attempts, exiting program";
+                cout << "Too many unsuccessful attempts, exiting program\n";
                 return 1;
             }
             cout << "Incorrect password, input your password again: " << endl;
             cin >> password;
+	    char* encPwd = strdup(password.c_str());
+	    encrypt_password(encPwd);
         }
     } else {
         //Create new user in the passwd file.
@@ -103,7 +118,8 @@ int main(int argc, char *argv[]) {
             cout << "Please enter a password: " << endl;
             cin >> password;
         }
-        appendFileToWorkWith << user_account << ":" << password << ":" << user_id << ":" << group_id << ":" << "CrptX user" << ":" << "/cryptx" << ":" << "/bin/bash" << "\n";
+	char* dat = strdup(password.c_str());
+        appendFileToWorkWith << user_account << ":" << encrypt_password(dat) << ":" << user_id << ":" << group_id << ":" << "CrptX user" << ":" << "/cryptx" << ":" << "/bin/bash" << "\n";
         cout << "A new profile has been created for you." << endl;
         appendFileToWorkWith.close();
     }

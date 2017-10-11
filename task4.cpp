@@ -1,5 +1,6 @@
 #include <iostream>
 #include <openssl/evp.h>
+#include <cstring>
 using namespace std;
 static int RANDOM_STRING_LENGTH = 30;
 
