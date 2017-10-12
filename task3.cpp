@@ -42,14 +42,17 @@ int main(int argc, char *argv[]) {
     char* contents = strdup(buffer.str().c_str());
     char* contents_bit_shifted = strdup(buffer.str().c_str());
     size_t contents_size = strlen(contents);
+    int c = 0;
+    unsigned char* hash1;
+    unsigned char* hash2;
     EVP_DigestUpdate(&ctx, contents, contents_size);
-
 
     //Print out initial file md5 digest
     EVP_DigestFinal(&ctx, md_value, &md_len);
+    hash1 = md_value;
     cout << "MD5 hash for input file [H1] −−> ";
     for(int i = 0; i < md_len; i++)  {
-        printf("%02x", md_value[i]);
+    printf("%02x", hash1[i]);
     }
 
     // Alter the last byte(char) of the file contents, simpler than bit flipping.
@@ -59,13 +62,19 @@ int main(int argc, char *argv[]) {
     EVP_DigestInit_ex(&ctx2, md, nullptr);
     EVP_DigestUpdate(&ctx2, contents_bit_shifted, contents_size);
     EVP_DigestFinal(&ctx2, md_value, &md_len);
-    cout << "MD5 hash for input file [H2]−−> ";
+    hash2 = md_value;
+    cout << "MD5 hash for input file [H2] −−> ";
     for(int i = 0; i < md_len; i++)  {
         printf("%02x", md_value[i]);
+    
     }
-    cout << endl << "These two files have 8 different bits (1 byte)\n";
+    for (int i = 0; i < md_len; i++){ 
+	if (hash1[i] == hash2[i]) { c = c + 1;
+    }
+    printf("\nThese two files have %i different bits (%i byte)\n", c*32, c);
 
     inFile.close();
     return 0;
+}
 }
 //https://linux.die.net/man/3/evp_digestinit
