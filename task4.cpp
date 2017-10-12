@@ -1,6 +1,7 @@
 #include <iostream>
 #include <openssl/evp.h>
 #include <cstring>
+
 using namespace std;
 static int RANDOM_STRING_LENGTH = 30;
 
@@ -72,7 +73,7 @@ int main(int argc, char *argv[]) {
     cout << endl << "====Testing one way property====" << endl;
     // Rudimentary Hash argument checking.
     if (argc != 2) {
-        cout << "Hash argument not supplied, exiting program.";
+        cout << "Hash argument not supplied, exiting program.\n";
         return 1;
     }
     char* hash_to_find = argv[1];
