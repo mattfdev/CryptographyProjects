@@ -31,6 +31,7 @@ int main(int argc, char *argv[]) {
     md = EVP_sha1();
     md2 = EVP_sha1();
     cout << "====Testing Collision free property====" << endl;
+    cout << "Finding a collision can take a while, please be patient." << endl;
     cout << "Initial random string " << initialString << endl;
     EVP_DigestInit_ex(&ctx, md, nullptr);
     EVP_DigestUpdate(&ctx, initialString, strlen(initialString));

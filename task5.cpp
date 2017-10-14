@@ -23,6 +23,7 @@ char SALT[3] = "xx"; //When running johnTester, this line is changed to: char SA
 char passwd_file[] = "passwd";
 string delim = ":";
 
+// Validate if supplied password meets system minimum requirements.
 bool password_requirments_passed(string password) {
     if (password.length() > 12) {
         cout << "Illegal password inputted, please input another password!";
@@ -35,13 +36,12 @@ bool password_requirments_passed(string password) {
     return true;
 }
 
-//Encrypt supplied password and return hash
+//Encrypt supplied password and return hash.
 char* encrypt_password(char* password) {
-	
 	return crypt(password, SALT);
 }
 
-// Check if user exists in passwd file
+// Check if user exists in passwd file.
 string check_user_exists(string inputted_user) {
     ifstream user_lookupFile(passwd_file);
     string user_credential_details, user_name;
@@ -63,12 +63,12 @@ int main(int argc, char *argv[]) {
     user_id = rand() % 100 + 1000;
 
     if (argc != 2) {
-        cout << "Incorrect number of arguments sent the program, please supply a maximum amount of password attempts argument\n";
+        cout << "Incorrect number of arguments sent the program, please supply a maximum amount of password attempts argument" << endl;
         return 1;
     }
     maximum_password_attempts = atoi(argv[1]);
     if (maximum_password_attempts == 0) {
-        cout << "Invalid max password attempts # inputted, please re-run the program with the correct argument supplied\n";
+        cout << "Invalid max password attempts # inputted, please re-run the program with the correct argument supplied" << endl;
         return 1;
     }
 
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
         while (!password_requirments_passed(password) || encrypt_password(strdup(password.c_str())) != database_password) {
             bad_password_counter++;
             if (bad_password_counter >= maximum_password_attempts) {
-                cout << "Too many unsuccessful attempts, exiting program\n";
+                cout << "Too many unsuccessful attempts, exiting program" << endl;
                 return 1;
             }
             cout << "Incorrect password, input your password again: " << endl;
@@ -118,8 +118,8 @@ int main(int argc, char *argv[]) {
             cout << "Please enter a password: " << endl;
             cin >> password;
         }
-	char* dat = strdup(password.c_str());
-        appendFileToWorkWith << user_account << ":" << encrypt_password(dat) << ":" << user_id << ":" << group_id << ":" << "CrptX user" << ":" << "/cryptx" << ":" << "/bin/bash" << "\n";
+	    char* user_pass = strdup(password.c_str());
+        appendFileToWorkWith << user_account << ":" << encrypt_password(user_pass) << ":" << user_id << ":" << group_id << ":" << "CrptX user" << ":" << "/cryptx" << ":" << "/bin/bash" << "\n";
         cout << "A new profile has been created for you." << endl;
         appendFileToWorkWith.close();
     }
