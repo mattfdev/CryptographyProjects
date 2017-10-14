@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     unsigned char md_value2[EVP_MAX_MD_SIZE];
     unsigned int md_len;
     fstream inFile;
-    string a1, a2, filename;
+    string filename;
     char h1[EVP_MAX_MD_SIZE];
     char h2[EVP_MAX_MD_SIZE];
     stringstream buffer;
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     char* contents = strdup(buffer.str().c_str());
     char* contents_bit_shifted = strdup(buffer.str().c_str());
     size_t contents_size = strlen(contents);
-    int bit_similarity_counter = 0;
+    int hex_similarity_counter = 0;
     EVP_DigestUpdate(&ctx, contents, contents_size);
 
     //Print out initial file md5 digest
@@ -53,8 +53,7 @@ int main(int argc, char *argv[]) {
     cout << "MD5 hash for input file [H1] −−> ";
     for(int i = 0; i < md_len; i++)  {
         printf("%02x", md_value[i]);
-        sprintf(h1,"%x", md_value[i]);
-        a1.append(h1);
+        printf("%02x", md_value[i]);
     }
 
     cout << endl << "Flipping Last bit ..." << endl;
@@ -65,16 +64,18 @@ int main(int argc, char *argv[]) {
     cout << "MD5 hash for input file [H2] −−> ";
     for (int i = 0; i < md_len; i++)  {
         printf("%02x", md_value2[i]);
-	    sprintf(h2,"%x", md_value2[i]);
-        a2.append(h2);
+	    printf("%02x", md_value2[i]);
     }
 
-    for (int i = 0; i < a1.length(); i++) {
-        if (a1.c_str()[i] == a2.c_str()[i]) {
-            bit_similarity_counter++;
+    for (int i = 0; i < md_len; i++) {
+        // Check if the hex nibble pair is identical, and increment similarity count if true.
+        // This is done because OpenSSL stores an md5 hash as an array of hex nibble pairs.
+        if (md_value[i] == md_value2[i]) {
+            hex_similarity_counter += 2;
         }
     }
-    printf("\nCount of similar characters: %i\n", bit_similarity_counter*32);
+    // Each hex nibble is equivalent to 4 bytes (ex.1111 -> f) so multiply our hex similarity counter by 4 to get bits.
+    printf("\nCount of similar bits: %i\n", hex_similarity_counter * 4);
 
     inFile.close();
     return 0;
