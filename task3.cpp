@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     md = EVP_md5();
-    EVP_DigestInit_ex(&ctx, md, nullptr);
+    EVP_DigestInit_ex(&ctx, md, NULL);
     buffer << inFile.rdbuf();
     char* contents = strdup(buffer.str().c_str());
     char* contents_bit_shifted = strdup(buffer.str().c_str());
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 
     cout << endl << "Flipping Last bit ..." << endl;
     contents_bit_shifted[contents_size - 1] = ~contents_bit_shifted[contents_size - 1];
-    EVP_DigestInit_ex(&ctx2, md, nullptr);
+    EVP_DigestInit_ex(&ctx2, md, NULL);
     EVP_DigestUpdate(&ctx2, contents_bit_shifted, contents_size);
     EVP_DigestFinal(&ctx2, md_value2, &md_len);
     cout << "MD5 hash for input file [H2] −−> ";

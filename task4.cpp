@@ -7,8 +7,8 @@ static int RANDOM_STRING_LENGTH = 30;
 
 // Generate random 30 char long string.
 char* generate_random_string(int length) {
-    auto random_string = (char*) malloc (31);
-    if (random_string == nullptr) exit (1);
+    char* random_string = (char*) malloc (31);
+    if (random_string == NULL) exit (1);
 
     for(int i = 0;i < length;i++) {
         random_string[i] = rand() % 26 + 'a';
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     unsigned char md_value[EVP_MAX_MD_SIZE], md_value2[EVP_MAX_MD_SIZE];
     unsigned int md_len, md_len2;
     int create_collision_count = 0, one_way_property_count = 0;
-    srand(time(nullptr) );
+    srand(time(NULL) );
 
     char* initialString = generate_random_string(RANDOM_STRING_LENGTH);
     md = EVP_sha1();
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     cout << "====Testing Collision free property====" << endl;
     cout << "Finding a collision can take a while, please be patient." << endl;
     cout << "Initial random string " << initialString << endl;
-    EVP_DigestInit_ex(&ctx, md, nullptr);
+    EVP_DigestInit_ex(&ctx, md, NULL);
     EVP_DigestUpdate(&ctx, initialString, strlen(initialString));
     EVP_DigestFinal(&ctx, md_value, &md_len);
     cout << "SHA1 hash for initial string −−> ";
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     while(true) {
         bool foundMatch = false;
         // Initialize hashing function
-        EVP_DigestInit_ex(&ctx2, md2, nullptr);
+        EVP_DigestInit_ex(&ctx2, md2, NULL);
         char* second_string = generate_random_string(RANDOM_STRING_LENGTH);
         EVP_DigestUpdate(&ctx2, second_string, strlen(second_string));
         EVP_DigestFinal(&ctx2, md_value2, &md_len2);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     while(true) {
         bool foundMatch = false;
         // Initialize hashing function
-        EVP_DigestInit_ex(&ctx2, md2, nullptr);
+        EVP_DigestInit_ex(&ctx2, md2, NULL);
         char* second_string = generate_random_string(RANDOM_STRING_LENGTH);
         EVP_DigestUpdate(&ctx2, second_string, strlen(second_string));
         EVP_DigestFinal(&ctx2, md_value2, &md_len2);
