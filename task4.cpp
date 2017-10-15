@@ -27,6 +27,28 @@ int main(int argc, char *argv[]) {
     int create_collision_count = 0, one_way_property_count = 0;
     srand(time(NULL) );
 
+    // Rudimentary Hash argument checking.
+    if (argc != 2) {
+        cout << "6 hex long hash argument not supplied, exiting program.\n";
+        return 1;
+    }
+    char* hash_to_find = argv[1];
+    cout << "Looking for hash: " << hash_to_find << endl;
+    if (strlen(hash_to_find) != 6) {
+        cout << "Hash argument supplied is incorrect length, please supply a 6 hex letter long hash";
+        return 1;
+    }
+    for (int j = 0; j < 6; j++) {
+        if (hash_to_find[j] > 'f') {
+            cout << "Invalid hash character supplied, please supply letters for hash that are lower than or equal to the hex letter F";
+            return 1;
+        } else if (isdigit(hash_to_find[j])) {
+            cout << "Invalid hash character supplied, don't supply numbers in the hex to find, as specified in the lab requirements.";
+            return 1;
+        }
+
+    }
+
     char* initialString = generate_random_string(RANDOM_STRING_LENGTH);
     md = EVP_sha1();
     md2 = EVP_sha1();
@@ -72,22 +94,6 @@ int main(int argc, char *argv[]) {
 
     //Part 2
     cout << endl << "====Testing one way property====" << endl;
-    // Rudimentary Hash argument checking.
-    if (argc != 2) {
-        cout << "Hash argument not supplied, exiting program.\n";
-        return 1;
-    }
-    char* hash_to_find = argv[1];
-    cout << "Looking for hash: " << hash_to_find << endl;
-    if (strlen(hash_to_find) != 6) {
-        cout << "Hash argument supplied is incorrect length, please supply a 6 letter long hash";
-    }
-    for (int j = 0; j < 6; j++) {
-        if (hash_to_find[j] > 'f') {
-            cout << "Invalid hash character supplied, please supply letters for hash that are lower than or equal to the letter F";
-            return 1;
-        }
-    }
     // Search for a random string, that when hashed, will have the same leading 24 bits as the user inputted into the program to find.
     while(true) {
         bool foundMatch = false;
