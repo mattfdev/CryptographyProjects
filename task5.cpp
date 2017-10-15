@@ -13,10 +13,6 @@
 #include <unistd.h>
 #include <crypt.h>
 
-
-
-
-
 using namespace std;
 
 char SALT[3] = "xx"; //When running johnTester, this line is changed to: char SALT[10] = "xxxxxxxxx"
