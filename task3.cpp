@@ -53,7 +53,6 @@ int main(int argc, char *argv[]) {
     cout << "MD5 hash for input file [H1] −−> ";
     for(int i = 0; i < md_len; i++)  {
         printf("%02x", md_value[i]);
-        printf("%02x", md_value[i]);
     }
 
     cout << endl << "Flipping Last bit ..." << endl;
@@ -64,7 +63,6 @@ int main(int argc, char *argv[]) {
     cout << "MD5 hash for input file [H2] −−> ";
     for (int i = 0; i < md_len; i++)  {
         printf("%02x", md_value2[i]);
-	    printf("%02x", md_value2[i]);
     }
 
     for (int i = 0; i < md_len; i++) {
