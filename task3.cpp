@@ -22,8 +22,6 @@ int main(int argc, char *argv[]) {
     unsigned int md_len;
     fstream inFile;
     string filename;
-    char h1[EVP_MAX_MD_SIZE];
-    char h2[EVP_MAX_MD_SIZE];
     stringstream buffer;
 
     if (argc != 2) {
@@ -56,6 +54,7 @@ int main(int argc, char *argv[]) {
     }
 
     cout << endl << "Flipping Last bit ..." << endl;
+    // Bit shift the last charecter in the string and hash it
     contents_bit_shifted[contents_size - 1] = ~contents_bit_shifted[contents_size - 1];
     EVP_DigestInit_ex(&ctx2, md, NULL);
     EVP_DigestUpdate(&ctx2, contents_bit_shifted, contents_size);

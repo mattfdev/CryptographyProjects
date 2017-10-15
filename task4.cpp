@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     EVP_DigestUpdate(&ctx, initialString, strlen(initialString));
     EVP_DigestFinal(&ctx, md_value, &md_len);
     cout << "SHA1 hash for initial string −−> ";
-    // Print 24 bit hash of original string
+    // Print 24 bit hash of the original string
     for (int i = 0; i < 3; i++) {
         printf("%x", md_value[i]);
     }
@@ -116,12 +116,14 @@ int main(int argc, char *argv[]) {
         // hash representation (conveniently packaged into a C++ string). If a character differs between the two, break,
         // and generate a new random string to hash and test for collision.
         for (int i = 0; i < 6; i++) {
+            // If a character is found that doesn't match break, and generate a new string to hash.
             if ( hash_string_representation[i] != hash_to_find[i]) {
                 foundMatch = false;
                 break;
             }
             foundMatch = true;
         }
+        //If a matching hash is found print the string that hashes to the same value, and break out of infinite loop.
         if (foundMatch) {
             cout << endl << "Found plain text with matching hash: " << second_string << " : ";
             for (int i = 0; i < 3; i++) {

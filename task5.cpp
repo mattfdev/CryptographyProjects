@@ -86,13 +86,14 @@ int main(int argc, char *argv[]) {
         cin >> user_account;
     }
     does_user_exist = check_user_exists(user_account);
-
+    // If the user is found validate their password, or terminate the program if they donot authenticate before password limit exceeded.
     if (!does_user_exist.empty()) {
         cout << "Input your password " << endl;
         cin >> password;
         // Find the password of the user in the passwd file and save it for future comparison.
         does_user_exist.erase(0, does_user_exist.find(delim) + delim.length());
         database_password = does_user_exist.substr(0, does_user_exist.find(delim));
+
         while (!password_requirments_passed(password) || encrypt_password(strdup(password.c_str())) != database_password) {
             bad_password_counter++;
             if (bad_password_counter >= maximum_password_attempts) {
@@ -101,8 +102,6 @@ int main(int argc, char *argv[]) {
             }
             cout << "Incorrect password, input your password again: " << endl;
             cin >> password;
-	    char* encPwd = strdup(password.c_str());
-	    encrypt_password(encPwd);
         }
     } else {
         //Create new user in the passwd file.
@@ -115,6 +114,8 @@ int main(int argc, char *argv[]) {
             cin >> password;
         }
 	    char* user_pass = strdup(password.c_str());
+        // Create a new user in  the passwd file with an the encrypted password. The user is asigned a userId at random
+        // and a groupid and user description. After creation the user is told they are 'logged in' and the program exits.
         appendFileToWorkWith << user_account << ":" << encrypt_password(user_pass) << ":" << user_id << ":" << group_id << ":" << "CrptX user" << ":" << "/cryptx" << ":" << "/bin/bash" << "\n";
         cout << "A new profile has been created for you." << endl;
         appendFileToWorkWith.close();
