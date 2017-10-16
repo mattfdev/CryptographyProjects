@@ -30,3 +30,8 @@ UserId and password requirements are exactly as specified in the lab, refer to l
 ./task5 5
 ```
 
+### Task 6 and 7
+Please add executable permissions to johnTester.sh berfore running the script (runs both crunch and john).
+```
+chmod +x johnTester.sh
+```
