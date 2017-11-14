@@ -70,20 +70,20 @@ vector<bitset<12>> convert_binary_strings_to_blocks(vector<string> bit_strings) 
 
 bitset<8> get_encryption_round_key(bitset<9> ekey, int n) {
     bitset<8> roundKey;
-    n = n - 1;
+    n = 10 - (n-1)%9;
     // Key returns the nth digit onwards
     for (int i = 0; i < 8 ; ++i ) {
         roundKey[i] = ekey[((n+i)%9)];
     }
     return roundKey;
 }
-// Does this work?
+
 bitset<8> get_decryption_round_key(bitset<9> ekey, int n) {
     bitset<8> roundKey;
-    //n = n - 1; // Key returns the nth digit onwards
-    n = n - 9;
-    for (int i = 0; i < 9; ++i) {
-        roundKey[i] = ekey[(n + i) % 9];
+    n = 10 - (n-1)%9;
+    // Key returns the nth digit onwards
+    for (int i = 0; i < 8 ; ++i ) {
+        roundKey[i] = ekey[((n+i)%9)];
     }
     return roundKey;
 }
@@ -134,13 +134,13 @@ int main(int argc, char *argv[]) {
     bitset<9> encryption_key(key); // this is to test.
     cout << "the key is:" << key << "\n";
     cout << "round key 1" << "\n" ;
-    cout << get_round_key(encryption_key, 1) << endl;
-    cout << "round key 2" << "\n" ;
-    cout << get_round_key(encryption_key, 2) << endl;
+    cout << get_encryption_round_key(encryption_key, 1) << endl;
     cout << "round key 3" << "\n" ;
-    cout << get_round_key(encryption_key, 3) << endl;
-    cout << "round key 4" << "\n" ;
-    cout << get_round_key(encryption_key, 4) << endl;
+    cout << get_encryption_round_key(encryption_key, 3) << endl;
+    cout << "round key 12" << "\n" ;
+    cout << get_encryption_round_key(encryption_key, 12) << endl;
+    cout << "round key 10" << "\n" ;
+    cout << get_encryption_round_key(encryption_key, 10) << endl;
 
     cout << plaintext << endl;
     bit_strings = convert_to_binary(plaintext);
