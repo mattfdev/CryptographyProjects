@@ -63,9 +63,10 @@ bitset<8> get_round_key(bitset<9> ekey, int n)
 {
 
     bitset<8> roundKey;
-    n = n - 1; // Key returns the nth digit onwards
-    for (int i = 0; i < 9 ; ++i ) {
-        roundKey[i] = ekey[(n+i)%9];
+    n = n - 1;
+    // Key returns the nth digit onwards
+    for (int i = 0; i < 8 ; ++i ) {
+        roundKey[i] = ekey[((n+i)%9)];
     }
     return roundKey;
 }
@@ -85,7 +86,7 @@ bitset<8> expansion(bitset<6> bit_strings) {
 
 
 
-bitset<8> encrypt(bitset<6> bit_strings, bitset<9> ekey ) {
+bitset<8> encrypt(bitset<6> bit_strings, bitset<8> ekey ) {
     bitset<8> encrypted_stuff = expansion(bit_strings);
     encrypted_stuff = encrypted_stuff ^= ekey;
 
@@ -95,6 +96,7 @@ int main(int argc, char *argv[]) {
 
     vector<string> bit_strings;
     vector<bitset<12>> encryption_blocks;
+
 
     if (argc != 3) {
         cout << "Incorrect number of arguments sent the program, please supply some plaintext and a key of length 9 for encryption" << endl;
@@ -112,7 +114,16 @@ int main(int argc, char *argv[]) {
         cout << "Please enter a valid binary key of length 9" << endl;
         return 1;
     }
-    bitset<9> encryption_key(key);
+    bitset<9> encryption_key(key); // this is to test.
+    cout << "the key is:" << key << "\n";
+    cout << "round key 1" << "\n" ;
+    cout << get_round_key(encryption_key, 1) << endl;
+    cout << "round key 2" << "\n" ;
+    cout << get_round_key(encryption_key, 2) << endl;
+    cout << "round key 3" << "\n" ;
+    cout << get_round_key(encryption_key, 3) << endl;
+    cout << "round key 4" << "\n" ;
+    cout << get_round_key(encryption_key, 4) << endl;
 
     cout << plaintext << endl;
     bit_strings = convert_to_binary(plaintext);
