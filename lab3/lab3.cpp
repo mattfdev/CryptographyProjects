@@ -6,14 +6,8 @@
 
 using namespace std;
 
-int substitution_box_1_vert [2] = {0,1};
-int substitution_box_1_1_horiz [8] = {5,2,1,6,3,4,7,0};
-int substitution_box_1_2_horiz [8] = {1,4,6,2,0,7,5,3};
-
-int substitution_box_2_vert [2] = {0,1};
-int substitution_box_2_1_horiz [8] = {4,0,6,5,7,1,3,2};
-int substitution_box_2_2_horiz [8] = {5,3,0,7,6,2,1,4};
-
+long substitution_box_1[2][8] = {{5,2,1,6,3,4,7,0}, {1,4,6,2,0,7,5,3}};
+long substitution_box_2[2][8] = {{4,0,6,5,7,1,3,2}, {5,3,0,7,6,2,1,4}};
 
 vector<string> convert_to_binary(const string input) {
     // Lets make a vector to hold all the ASCII character values.
@@ -30,6 +24,19 @@ vector<string> convert_to_binary(const string input) {
         block.push_back(b.to_string());
     }
     return block;
+}
+
+long convert_binary_decimal(unsigned long bin_num) {
+    unsigned long decimal = 0;
+    int remainder=0, base = 1;
+
+    while (bin_num > 0) {
+        remainder = bin_num % 10;
+        decimal = decimal + remainder * base;
+        bin_num = bin_num / 10;
+        base = base * 2;
+    }
+    return decimal;
 }
 
 vector<bitset<12>> convert_binary_strings_to_blocks(vector<string> bit_strings) {
@@ -101,12 +108,18 @@ bitset<8> expansion(bitset<6> bit_strings) {
     return output;
 }
 
-
-
-bitset<8> encrypt(bitset<6> bit_string, bitset<8> ekey) {
-    bitset<8> encrypted_stuff = expansion(bit_string);
-    encrypted_stuff = encrypted_stuff ^= ekey;
-    return encrypted_stuff;
+// Incrementally build a Light-DES encryption block.
+bitset<6> encrypt(bitset<6> bit_string, bitset<8> ekey) {
+    bitset<8> intermediary_block = expansion(bit_string);
+    intermediary_block = intermediary_block ^= ekey;
+    // Take the last 3 digits of the left and right sublocks, convert to decimal numbers to use as array indices to access.
+    long left_block_array_number = convert_binary_decimal(strtoul(intermediary_block.to_string().substr(1,3), NULL, 2));
+    long right_block_array_number = convert_binary_decimal(strtoul(intermediary_block.to_string().substr(5,3), NULL, 2));
+    long left_block_substituted = substitution_box_1[intermediary_block[0]][left_block_array_number];
+    long right_block_substitued = substitution_box_1[intermediary_block[4]][right_block_array_number];
+    unsigned long encrypted_binary = strtoul(to_string(left_block_substituted).append(to_string(right_block_substitued)));
+    bitset<6> encrypted_block (encrypted_binary);
+    return encrypted_block;
 }
 
 int main(int argc, char *argv[]) {
@@ -143,8 +156,7 @@ int main(int argc, char *argv[]) {
     cout << get_encryption_round_key(encryption_key, 10) << endl;
 
     cout << plaintext << endl;
-    bit_strings = convert_to_binary(plaintext);
-    encryption_blocks = convert_binary_strings_to_blocks(bit_strings);
+    encryption_blocks = convert_binary_strings_to_blocks(convert_to_binary(plaintext));
 
     //cout << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
     for(bitset<12> bits : encryption_blocks) {
