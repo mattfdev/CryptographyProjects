@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <vector>
 #include <bitset>
+#include <stdlib.h>
 
 
 using namespace std;
@@ -112,12 +113,12 @@ bitset<8> expansion(bitset<6> bit_strings) {
 bitset<6> encrypt(bitset<6> bit_string, bitset<8> ekey) {
     bitset<8> intermediary_block = expansion(bit_string);
     intermediary_block = intermediary_block ^= ekey;
-    // Take the last 3 digits of the left and right sublocks, convert to decimal numbers to use as array indices to access.
-    long left_block_array_number = convert_binary_decimal(strtoul(intermediary_block.to_string().substr(1,3), NULL, 2));
-    long right_block_array_number = convert_binary_decimal(strtoul(intermediary_block.to_string().substr(5,3), NULL, 2));
+    // Take the last 3 digits of the left and right sub-blocks, convert to decimal numbers to use as array indices to access.
+    long left_block_array_number = convert_binary_decimal(std::strtoul(intermediary_block.to_string().substr(1,3).c_str(), NULL, 2));
+    long right_block_array_number = convert_binary_decimal(std::strtoul(intermediary_block.to_string().substr(5,3).c_str(), NULL, 2));
     long left_block_substituted = substitution_box_1[intermediary_block[0]][left_block_array_number];
-    long right_block_substitued = substitution_box_1[intermediary_block[4]][right_block_array_number];
-    unsigned long encrypted_binary = strtoul(to_string(left_block_substituted).append(to_string(right_block_substitued)));
+    long right_block_substitued = substitution_box_2[intermediary_block[4]][right_block_array_number];
+    unsigned long encrypted_binary = std::strtoul(to_string(left_block_substituted).append(to_string(right_block_substitued)).c_str(), NULL, 2);
     bitset<6> encrypted_block (encrypted_binary);
     return encrypted_block;
 }
