@@ -6,6 +6,15 @@
 
 using namespace std;
 
+int substitution_box_1_vert [2] = {0,1};
+int substitution_box_1_1_horiz [8] = {5,2,1,6,3,4,7,0};
+int substitution_box_1_2_horiz [8] = {1,4,6,2,0,7,5,3};
+
+int substitution_box_2_vert [2] = {0,1};
+int substitution_box_2_1_horiz [8] = {4,0,6,5,7,1,3,2};
+int substitution_box_2_2_horiz [8] = {5,3,0,7,6,2,1,4};
+
+
 vector<string> convert_to_binary(const string input) {
     // Lets make a vector to hold all the ASCII character values.
     vector<string> block;
@@ -59,9 +68,7 @@ vector<bitset<12>> convert_binary_strings_to_blocks(vector<string> bit_strings) 
     return encryption_blocks;
 }
 
-bitset<8> get_round_key(bitset<9> ekey, int n)
-{
-
+bitset<8> get_encryption_round_key(bitset<9> ekey, int n) {
     bitset<8> roundKey;
     n = n - 1;
     // Key returns the nth digit onwards
@@ -70,26 +77,36 @@ bitset<8> get_round_key(bitset<9> ekey, int n)
     }
     return roundKey;
 }
+// Does this work?
+bitset<8> get_decryption_round_key(bitset<9> ekey, int n) {
+    bitset<8> roundKey;
+    //n = n - 1; // Key returns the nth digit onwards
+    n = n - 9;
+    for (int i = 0; i < 9; ++i) {
+        roundKey[i] = ekey[(n + i) % 9];
+    }
+    return roundKey;
+}
 
 bitset<8> expansion(bitset<6> bit_strings) {
-    bitset<8> oput;
-    oput[0] = bit_strings[0];
-    oput[1] = bit_strings[1];
-    oput[2] = bit_strings[3];
-    oput[3] = bit_strings[2];
-    oput[4] = bit_strings[3];
-    oput[5] = bit_strings[2];
-    oput[6] = bit_strings[4];
-    oput[7] = bit_strings[5];
-    return oput;
+    bitset<8> output;
+    output[0] = bit_strings[0];
+    output[1] = bit_strings[1];
+    output[2] = bit_strings[3];
+    output[3] = bit_strings[2];
+    output[4] = bit_strings[3];
+    output[5] = bit_strings[2];
+    output[6] = bit_strings[4];
+    output[7] = bit_strings[5];
+    return output;
 }
 
 
 
-bitset<8> encrypt(bitset<6> bit_strings, bitset<8> ekey ) {
-    bitset<8> encrypted_stuff = expansion(bit_strings);
+bitset<8> encrypt(bitset<6> bit_string, bitset<8> ekey) {
+    bitset<8> encrypted_stuff = expansion(bit_string);
     encrypted_stuff = encrypted_stuff ^= ekey;
-
+    return encrypted_stuff;
 }
 
 int main(int argc, char *argv[]) {
