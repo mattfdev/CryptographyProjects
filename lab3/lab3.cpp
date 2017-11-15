@@ -2,7 +2,6 @@
 #include <iomanip>
 #include <vector>
 #include <bitset>
-#include <stdlib.h>
 
 
 using namespace std;
@@ -10,6 +9,7 @@ using namespace std;
 long substitution_box_1[2][8] = {{5,2,1,6,3,4,7,0}, {1,4,6,2,0,7,5,3}};
 long substitution_box_2[2][8] = {{4,0,6,5,7,1,3,2}, {5,3,0,7,6,2,1,4}};
 
+// Convert a string comprising solely of binary numbers to a 12 bit long set.
 vector<string> convert_to_binary(const string input) {
     // Lets make a vector to hold all the ASCII character values.
     vector<string> block;
@@ -27,6 +27,7 @@ vector<string> convert_to_binary(const string input) {
     return block;
 }
 
+// Helper function to convert a binary number base 2 to base 10 decimal.
 long convert_binary_decimal(unsigned long bin_num) {
     unsigned long decimal = 0;
     int remainder=0, base = 1;
@@ -40,6 +41,8 @@ long convert_binary_decimal(unsigned long bin_num) {
     return decimal;
 }
 
+// Convert a vector comprising of strings(that are simply binary numbers) to their bitset equivalent. Also zero pads
+// the strings appropriately to a length of 12 if required.
 vector<bitset<12>> convert_binary_strings_to_blocks(vector<string> bit_strings) {
     vector<bitset<12>> encryption_blocks;
     int iterator = 0;
@@ -76,6 +79,7 @@ vector<bitset<12>> convert_binary_strings_to_blocks(vector<string> bit_strings) 
     return encryption_blocks;
 }
 
+// Get encryption key given master key, and round number.
 bitset<8> get_encryption_round_key(bitset<9> ekey, int n) {
     bitset<8> roundKey;
     n = 10 - (n-1)%9;
@@ -86,6 +90,7 @@ bitset<8> get_encryption_round_key(bitset<9> ekey, int n) {
     return roundKey;
 }
 
+// Get decryption key given master key, and round number.
 bitset<8> get_decryption_round_key(bitset<9> ekey, int n) {
     bitset<8> roundKey;
     n = 10 - (n-1)%9;
@@ -96,6 +101,7 @@ bitset<8> get_decryption_round_key(bitset<9> ekey, int n) {
     return roundKey;
 }
 
+// Expands a 6 bit long bitset to 8, using a hardcoded subsitution function.
 bitset<8> expansion(bitset<6> bit_strings) {
     bitset<8> output;
     output[0] = bit_strings[0];
@@ -135,15 +141,17 @@ bitset<6> encrypt(bitset<6> bit_string, bitset<8> ekey) {
     cout << "should see 2" << "\n";
     cout << right_block_substituted << endl;
     unsigned long encrypted_binary = std::strtoul(to_string(left_block_substituted).append(to_string(right_block_substituted)).c_str(), NULL, 2);
-    bitset<6> encrypted_block (encrypted_binary);
+    bitset<6> encrypted_block(encrypted_binary);
     return encrypted_block;
 }
 
+// Helper function facilitating a single round of light-DES.
 bitset<12> manipulate_blocks(bitset<12> input_block, bitset<8> ekey) {
     bitset<6> left_encryption_block(input_block.to_string().substr(0,6));
     bitset<6> right_encryption_block(input_block.to_string().substr(6,6));
     bitset<6> encrypted_right_block = encrypt(right_encryption_block, ekey);
     encrypted_right_block = encrypted_right_block ^= left_encryption_block;
+    // Create bitset compirsed of unmodified right sub-block bits appended with modified left XOR encrypted right sub-block bits.
     bitset<12> final_encrypted_block(right_encryption_block.to_string().append(encrypted_right_block.to_string()));
     return final_encrypted_block;
 }
@@ -196,6 +204,7 @@ int main(int argc, char *argv[]) {
     encryption_blocks = convert_binary_strings_to_blocks(convert_to_binary(plaintext));
 
     cout << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
+    // Encrypt the plaintext to ciphertext using the light DES algorithm.
     for (int i = 0; i < encryption_rounds; i++) {
         bitset<8> round_key = get_encryption_round_key(encryption_key, i);
         for (int j = 0; j < encryption_blocks.size(); j++) {
