@@ -230,5 +230,19 @@ int main(int argc, char *argv[]) {
         cout << encryption_blocks[j] << endl;
     }
 
+    for (int i = 0; i < encryption_rounds; i++) {
+        bitset<8> round_key = get_encryption_round_key(encryption_key, i);
+        encryption_blocks[0] = manipulate_blocks(encryption_blocks[0], round_key);
+        for (int j = 1; j < encryption_blocks.size(); j++) {
+            encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j-1];
+            encryption_blocks[j] = manipulate_blocks(encryption_blocks[j], round_key);
+        }
+    }
+
+    cout << "post-CBC-encryption: block 1:" << encryption_blocks[0] << "post-CBC-encryption: block 2: " << encryption_blocks[1];
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
+    }
+
 
     }
