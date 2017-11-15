@@ -174,7 +174,8 @@ int main(int argc, char *argv[]) {
     encryption_blocks = convert_binary_strings_to_blocks(convert_to_binary(plaintext));
 
 
-    cout << "pre-encryption: block 1:" << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
+    cout << " pre-encryption blocks:\n";
+
     for (int j = 0; j < encryption_blocks.size(); j++) {
         cout << encryption_blocks[j] << endl;
     }
@@ -187,7 +188,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    cout << "post-encryption: block 1:" << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
+    cout << " post-encryption blocks:\n";
     for (int j = 0; j < encryption_blocks.size(); j++) {
         cout << encryption_blocks[j] << endl;
     }
@@ -198,30 +199,35 @@ int main(int argc, char *argv[]) {
             encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
         }
     }
-    cout << " post-post-encryption: block 1:" << encryption_blocks[0] << "post-post-encryption: block 2: " << encryption_blocks[1];
+    cout << " post-decryption blocks:\n";
     for (int j = 0; j < encryption_blocks.size(); j++) {
         cout << encryption_blocks[j] << endl;
     }
-    cout << " encryption block pre flip: " << encryption_blocks[0] << "\n";
-    encryption_blocks[0] = encryption_blocks[0] ^= IV;
-    cout << " encryption block post flip:" << encryption_blocks[0] << "\n";
-    for (int k = 1; k < encryption_blocks.size(); k++) {
-        cout << " encryption block pre flip: " << encryption_blocks[k] << "\n";
-        encryption_blocks[k] = encryption_blocks[k] ^= encryption_blocks[k - 1];
-        cout << " encryption block post flip:" << encryption_blocks[k] << "\n";
-        for (int i = 0; i < encryption_rounds; i++) {
-            bitset<8> round_key = get_encryption_round_key(encryption_key, i);
-            encryption_blocks[0] = apply_des(encryption_blocks[0], round_key);
-            for (int j = 1; j < encryption_blocks.size(); j++) {
-                encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
-            }
+    for (int i = 0; i < encryption_rounds; i++) {
+        bitset<8> round_key = get_encryption_round_key(encryption_key, i);
+        for (int j = 0; j < encryption_blocks.size(); j++) {
+            if (j == 0) { encryption_blocks[j] = encryption_blocks[j] ^= IV;}
+            else{
+                encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j-1]; }
+            encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
         }
     }
-
-    cout << "post-CBC-encryption: block 1:" << encryption_blocks[0] << "\n post-CBC-encryption: block 2: " << encryption_blocks[1];
+    cout << "post-CBC-encryption blocks: \n";
     for (int j = 0; j < encryption_blocks.size(); j++) {
         cout << encryption_blocks[j] << endl;
     }
 
-
+    for (int i = 0; i < encryption_rounds; i++) {
+        bitset<8> round_key = get_encryption_round_key(encryption_key, encryption_rounds- i);
+        for (int j = 0; j < encryption_blocks.size(); j++) {
+            if (j == 0) { encryption_blocks[j] = encryption_blocks[j] ^= IV;}
+            else{
+                encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j-1]; }
+            encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
+        }
     }
+}
+
+
+
+
