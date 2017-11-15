@@ -117,7 +117,7 @@ bitset<8> expansion(bitset<6> bit_strings) {
 
 // Incrementally build a Light-DES encryption block.
 bitset<6> encrypt(bitset<6> bit_string, bitset<8> ekey) {
- //   cout << "encrypt fxn; intermediate block should be 00110111. it is:" << "\n";
+    //   cout << "encrypt fxn; intermediate block should be 00110111. it is:" << "\n";
     bitset<8> intermediary_block = expansion(bit_string);
     intermediary_block = intermediary_block ^= ekey;
     //    cout << intermediary_block << endl;
@@ -211,11 +211,24 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < encryption_rounds; i++) {
         bitset<8> round_key = get_encryption_round_key(encryption_key, i);
         for (int j = 0; j < encryption_blocks.size(); j++) {
-            manipulate_blocks(encryption_blocks[j], round_key);
+            encryption_blocks[j] = manipulate_blocks(encryption_blocks[j], round_key);
         }
-        }
+    }
     cout << "post-encryption: block 1:" << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
     for (int j = 0; j < encryption_blocks.size(); j++) {
         cout << encryption_blocks[j] << endl;
     }
+
+    for (int i = 0; i < encryption_rounds; i++) {
+        bitset<8> round_key = get_encryption_round_key(encryption_key, encryption_rounds - i);
+        for (int j = 0; j < encryption_blocks.size(); j++) {
+            encryption_blocks[j] = manipulate_blocks(encryption_blocks[j], round_key);
+        }
+    }
+    cout << "post-post-encryption: block 1:" << encryption_blocks[0] << " post-post-encryption: block 2: " << encryption_blocks[1];
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
+    }
+
+
     }
