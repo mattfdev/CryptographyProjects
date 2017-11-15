@@ -181,6 +181,7 @@ int main(int argc, char *argv[]) {
     }
     bitset<9> encryption_key(key); // this is to test.
     bitset<6> teststring("111000");
+    bitset<12> IV("111000111000");
  //    cout << "test string is:" << "\n";
  //    cout << teststring << endl;
  //    cout << "expansion of 111000 should be 11010100. expansion gives:" << "\n" ;
@@ -202,6 +203,7 @@ int main(int argc, char *argv[]) {
 
     cout << plaintext << endl;
     encryption_blocks = convert_binary_strings_to_blocks(convert_to_binary(plaintext));
+
 
     cout << "pre-encryption: block 1:" << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
     for (int j = 0; j < encryption_blocks.size(); j++) {
@@ -225,21 +227,27 @@ int main(int argc, char *argv[]) {
             encryption_blocks[j] = manipulate_blocks(encryption_blocks[j], round_key);
         }
     }
-    cout << "post-post-encryption: block 1:" << encryption_blocks[0] << " post-post-encryption: block 2: " << encryption_blocks[1];
+    cout << " post-post-encryption: block 1:" << encryption_blocks[0] << "post-post-encryption: block 2: " << encryption_blocks[1];
     for (int j = 0; j < encryption_blocks.size(); j++) {
         cout << encryption_blocks[j] << endl;
     }
-
-    for (int i = 0; i < encryption_rounds; i++) {
-        bitset<8> round_key = get_encryption_round_key(encryption_key, i);
-        encryption_blocks[0] = manipulate_blocks(encryption_blocks[0], round_key);
-        for (int j = 1; j < encryption_blocks.size(); j++) {
-            encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j-1];
-            encryption_blocks[j] = manipulate_blocks(encryption_blocks[j], round_key);
+    cout << " encryption block pre flip: " << encryption_blocks[0] << "\n";
+    encryption_blocks[0] = encryption_blocks[0] ^= IV;
+    cout << " encryption block post flip:" << encryption_blocks[0] << "\n";
+    for (int k = 1; k < encryption_blocks.size(); k++) {
+        cout << " encryption block pre flip: " << encryption_blocks[k] << "\n";
+        encryption_blocks[k] = encryption_blocks[k] ^= encryption_blocks[k - 1];
+        cout << " encryption block post flip:" << encryption_blocks[k] << "\n";
+        for (int i = 0; i < encryption_rounds; i++) {
+            bitset<8> round_key = get_encryption_round_key(encryption_key, i);
+            encryption_blocks[0] = manipulate_blocks(encryption_blocks[0], round_key);
+            for (int j = 1; j < encryption_blocks.size(); j++) {
+                encryption_blocks[j] = manipulate_blocks(encryption_blocks[j], round_key);
+            }
         }
     }
 
-    cout << "post-CBC-encryption: block 1:" << encryption_blocks[0] << "post-CBC-encryption: block 2: " << encryption_blocks[1];
+    cout << "post-CBC-encryption: block 1:" << encryption_blocks[0] << "\n post-CBC-encryption: block 2: " << encryption_blocks[1];
     for (int j = 0; j < encryption_blocks.size(); j++) {
         cout << encryption_blocks[j] << endl;
     }
