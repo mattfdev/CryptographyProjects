@@ -117,29 +117,29 @@ bitset<8> expansion(bitset<6> bit_strings) {
 
 // Incrementally build a Light-DES encryption block.
 bitset<6> encrypt(bitset<6> bit_string, bitset<8> ekey) {
-    cout << "encrypt fxn; intermediate block should be 00110111. it is:" << "\n";
+ //   cout << "encrypt fxn; intermediate block should be 00110111. it is:" << "\n";
     bitset<8> intermediary_block = expansion(bit_string);
     intermediary_block = intermediary_block ^= ekey;
-    cout << intermediary_block << endl;
+    //    cout << intermediary_block << endl;
     // Take the last 3 digits of the left and right sub-blocks, convert to decimal numbers to use as array indices to access.
     long left_block_array_number = convert_binary_decimal(std::strtoul(intermediary_block.to_string().substr(1,3).c_str(), NULL, 2));
     long left_block_row = convert_binary_decimal(std::strtoul(intermediary_block.to_string().substr(0,1).c_str(), NULL, 2));
     long left_block_substituted = substitution_box_1[left_block_row][(left_block_array_number)];
-    cout << "should see 3" << "\n";
-    cout << left_block_array_number << endl;
-    cout << "should see 0" << "\n";
-    cout << left_block_row << endl;
-    cout << "should see 6" << "\n";
-    cout << left_block_substituted << endl;
+    //   cout << "should see 3" << "\n";
+    //   cout << left_block_array_number << endl;
+    //   cout << "should see 0" << "\n";
+    //  cout << left_block_row << endl;
+    //  cout << "should see 6" << "\n";
+    // cout << left_block_substituted << endl;
     long right_block_array_number = convert_binary_decimal(std::strtoul(intermediary_block.to_string().substr(5,3).c_str(), NULL, 2));
     long right_block_row = convert_binary_decimal(std::strtoul(intermediary_block.to_string().substr(4,1).c_str(), NULL, 2));
     long right_block_substituted = substitution_box_2[right_block_row][(right_block_array_number)];
-    cout << "should see 7" << "\n";
-    cout << right_block_array_number<< endl;
-    cout << "should see 0" << "\n";
-    cout << right_block_row << endl;
-    cout << "should see 2" << "\n";
-    cout << right_block_substituted << endl;
+    //   cout << "should see 7" << "\n";
+    //  cout << right_block_array_number<< endl;
+    //  cout << "should see 0" << "\n";
+    //  cout << right_block_row << endl;
+    //  cout << "should see 2" << "\n";
+    //  cout << right_block_substituted << endl;
     unsigned long encrypted_binary = std::strtoul(to_string(left_block_substituted).append(to_string(right_block_substituted)).c_str(), NULL, 2);
     bitset<6> encrypted_block(encrypted_binary);
     return encrypted_block;
@@ -181,34 +181,41 @@ int main(int argc, char *argv[]) {
     }
     bitset<9> encryption_key(key); // this is to test.
     bitset<6> teststring("111000");
-    cout << "test string is:" << "\n";
-    cout << teststring << endl;
-    cout << "expansion of 111000 should be 11010100. expansion gives:" << "\n" ;
-    cout << expansion(teststring) << endl;
-    cout << "the key is:" << encryption_key << "\n";
-    cout << "round key 1" << "\n" ;
-    cout << get_encryption_round_key(encryption_key, 1) << endl;
-    bitset<8> testxor = expansion(teststring);
-    cout << "xor should give: 00110111. our test gives:" << "\n";
-    testxor = get_encryption_round_key(encryption_key, 1) ^= testxor;
-    cout << testxor << endl;
-    cout << encrypt(teststring, get_encryption_round_key(encryption_key, 1)) << endl;
-    cout << "round key 3" << "\n" ;
-    cout << get_encryption_round_key(encryption_key, 3) << endl;
-    cout << "round key 12" << "\n" ;
-    cout << get_encryption_round_key(encryption_key, 12) << endl;
-    cout << "round key 10" << "\n" ;
-    cout << get_encryption_round_key(encryption_key, 10) << endl;
+ //    cout << "test string is:" << "\n";
+ //    cout << teststring << endl;
+ //    cout << "expansion of 111000 should be 11010100. expansion gives:" << "\n" ;
+ //    cout << expansion(teststring) << endl;
+ //    cout << "the key is:" << encryption_key << "\n";
+ //    cout << "round key 1" << "\n" ;
+ //    cout << get_encryption_round_key(encryption_key, 1) << endl;
+ //    bitset<8> testxor = expansion(teststring);
+ //    cout << "xor should give: 00110111. our test gives:" << "\n";
+//    testxor = get_encryption_round_key(encryption_key, 1) ^= testxor;
+//     cout << testxor << endl;
+//      cout << encrypt(teststring, get_encryption_round_key(encryption_key, 1)) << endl;
+//      cout << "round key 3" << "\n" ;
+//      cout << get_encryption_round_key(encryption_key, 3) << endl;
+//      cout << "round key 12" << "\n" ;
+//      cout << get_encryption_round_key(encryption_key, 12) << endl;
+//      cout << "round key 10" << "\n" ;
+//      cout << get_encryption_round_key(encryption_key, 10) << endl;
 
     cout << plaintext << endl;
     encryption_blocks = convert_binary_strings_to_blocks(convert_to_binary(plaintext));
 
-    cout << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
+    cout << "pre-encryption: block 1:" << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
+    }
     // Encrypt the plaintext to ciphertext using the light DES algorithm.
     for (int i = 0; i < encryption_rounds; i++) {
         bitset<8> round_key = get_encryption_round_key(encryption_key, i);
         for (int j = 0; j < encryption_blocks.size(); j++) {
             manipulate_blocks(encryption_blocks[j], round_key);
         }
+        }
+    cout << "post-encryption: block 1:" << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
     }
-}
+    }
