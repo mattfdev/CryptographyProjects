@@ -139,19 +139,29 @@ bitset<6> encrypt(bitset<6> bit_string, bitset<8> ekey) {
     return encrypted_block;
 }
 
+bitset<12> manipulate_blocks(bitset<12> input_block, bitset<8> ekey) {
+    bitset<6> left_encryption_block(input_block.to_string().substr(0,6));
+    bitset<6> right_encryption_block(input_block.to_string().substr(6,6));
+    bitset<6> encrypted_right_block = encrypt(right_encryption_block, ekey);
+    encrypted_right_block = encrypted_right_block ^= left_encryption_block;
+    bitset<12> final_encrypted_block(right_encryption_block.to_string().append(encrypted_right_block.to_string()));
+    return final_encrypted_block;
+}
+
 int main(int argc, char *argv[]) {
 
     vector<string> bit_strings;
     vector<bitset<12>> encryption_blocks;
 
 
-    if (argc != 3) {
-        cout << "Incorrect number of arguments sent the program, please supply some plaintext and a key of length 9 for encryption" << endl;
+    if (argc != 4) {
+        cout << "Incorrect number of arguments sent the program, please supply some plaintext and a key of length 9 for encryption(in binary format), and number of rounds of encryption to perform." << endl;
         return 1;
     }
 
     string plaintext =  argv[1];
     string key = argv[2];
+    int encryption_rounds = atoi(argv[3]);
     if (key.find_first_not_of("01") != std::string::npos) {
         cout << "Illegal key inputted, please input another key, consisting wholly of binary digits" << endl;
         return false;
@@ -185,8 +195,11 @@ int main(int argc, char *argv[]) {
     cout << plaintext << endl;
     encryption_blocks = convert_binary_strings_to_blocks(convert_to_binary(plaintext));
 
-    //cout << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
-    for(bitset<12> bits : encryption_blocks) {
-        cout << bits;
+    cout << encryption_blocks[0] << " block 2: " << encryption_blocks[1];
+    for (int i = 0; i < encryption_rounds; i++) {
+        bitset<8> round_key = get_encryption_round_key(encryption_key, i);
+        for (int j = 0; j < encryption_blocks.size(); j++) {
+            manipulate_blocks(encryption_blocks[j], round_key);
+        }
     }
 }
