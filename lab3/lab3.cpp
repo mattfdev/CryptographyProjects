@@ -11,9 +11,8 @@ long substitution_box_2[2][8] = {{4,0,6,5,7,1,3,2}, {5,3,0,7,6,2,1,4}};
 
 // Convert a string comprising solely of binary numbers to a 12 bit long set.
 vector<string> convert_to_binary(const string input) {
-    // Lets make a vector to hold all the ASCII character values.
+    // A vector to hold all the ASCII character values.
     vector<string> block;
-
     // For each character, convert the ASCII chararcter to its binary
     // representation.
     for (int i = 0; i < input.size(); ++i) {
@@ -80,7 +79,7 @@ vector<bitset<12>> convert_binary_strings_to_blocks(vector<string> bit_strings) 
 // Get encryption key given master key, and round number.
 bitset<8> get_encryption_round_key(bitset<9> ekey, int n) {
     bitset<8> roundKey;
-    n = 10 - (n-1)%9;
+    n = 10 - (n - 1) % 9;
     // Key returns the nth digit onwards
     for (int i = 0; i < 8 ; ++i ) {
         roundKey[i] = ekey[((n+i)%9)];
@@ -116,18 +115,33 @@ bitset<8> expansion(bitset<6> bit_strings) {
 // Incrementally build a Light-DES encryption block.
 bitset<6> encrypt(bitset<6> bit_string, bitset<8> ekey) {
     bitset<8> intermediary_block = expansion(bit_string);
+    cout << "Encryption round key is " << ekey.to_string() << endl;
+    cout << "Expanded block of " << bit_string.to_string() << " is : " << intermediary_block.to_string() << endl;
     intermediary_block = intermediary_block ^= ekey;
+    cout << "XORED block is " << intermediary_block.to_string() << endl;
     // Take the last 3 digits of the left and right sub-blocks, convert to decimal numbers to use as array indices to access.
     long left_block_array_number = convert_binary_decimal(std::strtoul(intermediary_block.to_string().substr(1,3).c_str(), NULL, 2));
     long left_block_row = convert_binary_decimal(std::strtoul(intermediary_block.to_string().substr(0,1).c_str(), NULL, 2));
     long left_block_substituted = substitution_box_1[left_block_row][left_block_array_number];
+    bitset<3> left_bitset(left_block_substituted);
+    cout << "Array indeces of left bock s1 are " << left_block_row  << " and " << left_block_array_number << " the value subbed in is " << left_bitset.to_string() << endl;
 
     long right_block_array_number = convert_binary_decimal(std::strtoul(intermediary_block.to_string().substr(5,3).c_str(), NULL, 2));
     long right_block_row = convert_binary_decimal(std::strtoul(intermediary_block.to_string().substr(4,1).c_str(), NULL, 2));
     long right_block_substituted = substitution_box_2[right_block_row][right_block_array_number];
+    bitset<3> right_bitset(right_block_substituted);
+    cout << "Array indeces of right bock s2 are " << right_block_row  << " and " << right_block_array_number << " the value subbed in is " << right_bitset.to_string() << endl;
 
-    unsigned long encrypted_binary = std::strtoul(to_string(left_block_substituted).append(to_string(right_block_substituted)).c_str(), NULL, 2);
-    bitset<6> encrypted_block(encrypted_binary);
+    cout << "the left block is " << left_block_substituted << " and the right block is " << right_block_substituted << endl;
+    //unsigned long encrypted_binary = std::strtoul(to_string(left_block_substituted).append(to_string(right_block_substituted)).c_str(), NULL, 2);
+    bitset<6> encrypted_block;
+    encrypted_block[0] = right_bitset[0];
+    encrypted_block[1] = right_bitset[1];
+    encrypted_block[2] = right_bitset[2];
+    encrypted_block[3] = left_bitset[0];
+    encrypted_block[4] = left_bitset[1];
+    encrypted_block[5] = left_bitset[2];
+    cout << "the encrypytped text binary is " << encrypted_block.to_string() << endl << endl;
     return encrypted_block;
 }
 
@@ -170,78 +184,75 @@ int main(int argc, char *argv[]) {
     bitset<12> IV("111000111000");
 
 
-    cout << plaintext << endl;
     encryption_blocks = convert_binary_strings_to_blocks(convert_to_binary(plaintext));
-    cout << get_encryption_round_key(encryption_key, 1) << "\n";
 
-   // cout << " pre-encryption blocks:\n";
+   cout << " pre-encryption blocks:\n";
 
-//    for (int j = 0; j < encryption_blocks.size(); j++) {
- //       cout << encryption_blocks[j] << endl;
- //   }
+   for (int j = 0; j < encryption_blocks.size(); j++) {
+       cout << encryption_blocks[j] << endl;
+   }
     cout << "round keys for encrypt:\n";
     // Encrypt the plaintext to ciphertext using the light DES algorithm.
     for (int i = 1; i <= encryption_rounds; i++) {
         bitset<8> round_key = get_encryption_round_key(encryption_key, i);
         cout << round_key << "\n";
         for (int j = 0; j < encryption_blocks.size(); j++) {
-            cout << "round key for encryption" << round_key << "\n";
-            cout << "pre-encrypted block" << j << ": " << encryption_blocks[j] << "\n";
+    //        cout << "round key for encryption" << round_key << "\n";
+    //        cout << "pre-encrypted block" << j << ": " << encryption_blocks[j] << "\n";
             encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
-            cout << "post-encrypted block" << j << ": " << encryption_blocks[j] << "\n";
+    //        cout << "post-encrypted block" << j << ": " << encryption_blocks[j] << "\n";
 
         }
     }
 
-    //cout << " post-encryption blocks:\n";
-    //for (int j = 0; j < encryption_blocks.size(); j++) {
-     //   cout << encryption_blocks[j] << endl;
-   // }
-    cout << "round keys for decrypt:\n";
-
-    for (int i = 1; i <= encryption_rounds; i++) {
-        bitset<8> round_key = get_encryption_round_key(encryption_key, encryption_rounds - i + 1);
-        cout << round_key << "\n";
-        for (int j = 0; j < encryption_blocks.size(); j++) {
-            cout << "round key for decryption" << round_key << "\n";
-            cout << "pre-decrypted block" << j << ": " << encryption_blocks[j] << "\n";
-            encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
-            cout << "post-decrypted block" << j << ": " << encryption_blocks[j] << "\n";
-        }
+    cout << " post-encryption blocks:\n";
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
     }
-   // cout << " post-decryption blocks:\n";
- //   for (int j = 0; j < encryption_blocks.size(); j++) {
- //       cout << encryption_blocks[j] << endl;
-//    }
 
-    for (int i = 1; i <= encryption_rounds; i++) {
+    for (int i = encryption_rounds; i > 0; i--) {
         bitset<8> round_key = get_encryption_round_key(encryption_key, i);
+        cout << "decryption round key is " <<round_key << "\n";
         for (int j = 0; j < encryption_blocks.size(); j++) {
-            if (j == 0) { encryption_blocks[j] = encryption_blocks[j] ^= IV;}
-            else{
-                encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j-1]; }
+            //cout << "round key for decryption" << round_key << "\n";
+            //cout << "pre-decrypted block" << j << ": " << encryption_blocks[j] << "\n";
             encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
+            //cout << "post-decrypted block" << j << ": " << encryption_blocks[j] << "\n";
         }
     }
-    cout << "post-CBC-encryption blocks: \n";
+    cout << " post-decryption blocks:\n";
     for (int j = 0; j < encryption_blocks.size(); j++) {
         cout << encryption_blocks[j] << endl;
     }
 
-    for (int i = 1; i <= encryption_rounds; i++) {
-        bitset<8> round_key = get_encryption_round_key(encryption_key, encryption_rounds - i + 1);
-        for (int j = encryption_blocks.size() - 1; j >= 0 ; j--) {
-            encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
-            if (j == 0) { encryption_blocks[j] = encryption_blocks[j] ^= IV; }
-            else {
-                encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j - 1];
-            }
-            }
-        }
-    cout << "post-CBC-decryption blocks: \n";
-    for (int j = 0; j < encryption_blocks.size(); j++) {
-        cout << encryption_blocks[j] << endl;
-    }
+//    for (int i = 1; i <= encryption_rounds; i++) {
+//        bitset<8> round_key = get_encryption_round_key(encryption_key, i);
+//        for (int j = 0; j < encryption_blocks.size(); j++) {
+//            if (j == 0) { encryption_blocks[j] = encryption_blocks[j] ^= IV;}
+//            else{
+//                encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j-1]; }
+//            encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
+//        }
+//    }
+//    cout << "post-CBC-encryption blocks: \n";
+//    for (int j = 0; j < encryption_blocks.size(); j++) {
+//        cout << encryption_blocks[j] << endl;
+//    }
+//
+//    for (int i = 1; i <= encryption_rounds; i++) {
+//        bitset<8> round_key = get_encryption_round_key(encryption_key, encryption_rounds - i + 1);
+//        for (int j = encryption_blocks.size() - 1; j >= 0 ; j--) {
+//            encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
+//            if (j == 0) { encryption_blocks[j] = encryption_blocks[j] ^= IV; }
+//            else {
+//                encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j - 1];
+//            }
+//            }
+//        }
+//    cout << "post-CBC-decryption blocks: \n";
+//    for (int j = 0; j < encryption_blocks.size(); j++) {
+//        cout << encryption_blocks[j] << endl;
+//    }
     }
 
 
