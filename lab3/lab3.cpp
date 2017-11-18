@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <vector>
 #include <bitset>
+#include <fstream>
 
 
 using namespace std;
@@ -9,16 +10,17 @@ using namespace std;
 long substitution_box_1[2][8] = {{5,2,1,6,3,4,7,0}, {1,4,6,2,0,7,5,3}};
 long substitution_box_2[2][8] = {{4,0,6,5,7,1,3,2}, {5,3,0,7,6,2,1,4}};
 
+
 // Convert a string comprising solely of binary numbers to a 12 bit long set.
-vector<string> convert_to_binary(const string input) {
+vector<string> convert_to_binary(char* input, streampos file_content_size) {
     // A vector to hold all the ASCII character values.
     vector<string> block;
     // For each character, convert the ASCII chararcter to its binary
     // representation.
-    for (int i = 0; i < input.size(); ++i) {
+    for (int i = 0; i < file_content_size; ++i) {
         // Make a temporary variable called B to store the 8 bit pattern
         // for the ASCII value.
-        bitset<8> b(input.c_str()[i]);
+        bitset<8> b(input[i]);
 
         // Add that 8 bit pattern into the block.
         block.push_back(b.to_string());
@@ -87,7 +89,7 @@ bitset<8> get_encryption_round_key(bitset<9> ekey, int n) {
     return roundKey;
 }
 
-// Expands a 6 bit long bitset to 8, using a hardcoded subsitution function.
+// Expands a 6 bit long bitset to 8, using a hardcoded substitution function.
 bitset<8> expansion(bitset<6> bit_strings) {
     bitset<8> output;
     output[0] = bit_strings[0];
@@ -147,7 +149,7 @@ bitset<12> apply_des(bitset<12> input_block, bitset<8> ekey) {
     post_processed_right_block = post_processed_right_block ^= left_encryption_block;
 
 
-    // Create bitset compirsed of unmodified right sub-block bits appended with modified left XOR encrypted right sub-block bits.
+    // Create bitset comprised of unmodified right sub-block bits appended with modified left XOR encrypted right sub-block bits.
     bitset<12> final_encrypted_block;
     final_encrypted_block[0] = right_encryption_block[0];
     final_encrypted_block[1] = right_encryption_block[1];
@@ -181,7 +183,7 @@ int main(int argc, char *argv[]) {
     int encryption_rounds = atoi(argv[3]);
     if (key.find_first_not_of("01") != std::string::npos) {
         cout << "Illegal key inputted, please input another key, consisting wholly of binary digits" << endl;
-        return false;
+        return 1;
     }
 
     if (key.length() != 9) {
@@ -193,7 +195,21 @@ int main(int argc, char *argv[]) {
     bitset<12> IV("111000111000");
 
 
-    encryption_blocks = convert_binary_strings_to_blocks(convert_to_binary(plaintext));
+    ifstream file (plaintext, ios::in|ios::binary|ios::ate);
+    streampos file_content_size;
+    char * file_contents;
+
+    if (file.is_open()) {
+        file_content_size = file.tellg();
+        file_contents = new char [file_content_size];
+        file.seekg (0, ios::beg);
+        file.read (file_contents, file_content_size);
+        file.close();
+    } else {
+        cout << "Unable to open file, please provide an existing file as an argument.";
+        return 1;
+    }
+    encryption_blocks = convert_binary_strings_to_blocks(convert_to_binary(file_contents, file_content_size));
 
    cout << " pre-encryption blocks:\n";
 
@@ -251,14 +267,15 @@ int main(int argc, char *argv[]) {
     // CBC decryption
     for (int i = 1; i <= encryption_rounds; i++) {
         bitset<8> round_key = get_encryption_round_key(encryption_key, encryption_rounds - i + 1);
-        for (int j = encryption_blocks.size() - 1; j >= 0 ; j--) {
+        for (int j = encryption_blocks.size() - 1; j >= 0; j--) {
             encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
-            if (j == 0) { encryption_blocks[j] = encryption_blocks[j] ^= IV; }
-            else {
+            if (j == 0) {
+                encryption_blocks[j] = encryption_blocks[j] ^= IV;
+            } else {
                 encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j - 1];
             }
-            }
         }
+    }
     cout << "post-CBC-decryption blocks: \n";
     for (int j = 0; j < encryption_blocks.size(); j++) {
         cout << encryption_blocks[j] << endl;
