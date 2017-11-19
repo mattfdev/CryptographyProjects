@@ -1,7 +1,6 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <bitset>
 #include <fstream>
 
 
@@ -12,7 +11,7 @@ long substitution_box_2[2][8] = {{4,0,6,5,7,1,3,2}, {5,3,0,7,6,2,1,4}};
 
 
 // Convert a string comprising solely of binary numbers to a 12 bit long set.
-vector<string> convert_to_binary(char* input, streampos file_content_size) {
+vector<string> convert_string_to_binary(char *input, streampos file_content_size) {
     // A vector to hold all the ASCII character values.
     vector<string> block;
     // For each character, convert the ASCII chararcter to its binary
@@ -28,10 +27,22 @@ vector<string> convert_to_binary(char* input, streampos file_content_size) {
     return block;
 }
 
+// Generate random length long char string.
+char* generate_random_string(size_t length) {
+    char* random_string = (char*) malloc (length + 10);
+    if (random_string == NULL) exit (1);
+
+    for(int i = 0;i < length;i++) {
+        random_string[i] = rand() % 26 + 'a';
+    }
+    random_string[31] = '\0';
+    return random_string;
+}
+
 // Helper function to convert a binary number base 2 to base 10 decimal.
 long convert_binary_decimal(unsigned long bin_num) {
     unsigned long decimal = 0;
-    int remainder=0, base = 1;
+    int remainder = 0, base = 1;
 
     while (bin_num > 0) {
         remainder = bin_num % 10;
@@ -169,8 +180,12 @@ bitset<12> apply_des(bitset<12> input_block, bitset<8> ekey) {
 
 int main(int argc, char *argv[]) {
 
+    srand(time(NULL) );
     vector<string> bit_strings;
     vector<bitset<12>> encryption_blocks;
+    vector<bitset<12>> nonce_block_vector;
+    size_t nonce_size = 9;
+    char* nonce = generate_random_string(nonce_size);
 
 
     if (argc != 4) {
@@ -209,7 +224,7 @@ int main(int argc, char *argv[]) {
         cout << "Unable to open file, please provide an existing file as an argument.";
         return 1;
     }
-    encryption_blocks = convert_binary_strings_to_blocks(convert_to_binary(file_contents, file_content_size));
+    encryption_blocks = convert_binary_strings_to_blocks(convert_string_to_binary(file_contents, file_content_size));
 
    cout << " pre-encryption blocks:\n";
 
@@ -280,7 +295,46 @@ int main(int argc, char *argv[]) {
     for (int j = 0; j < encryption_blocks.size(); j++) {
         cout << encryption_blocks[j] << endl;
     }
+
+    // CTR Encryption
+    // Due to the Light DES encryption's very small block size of 12 bits, we cannot support file input of more that 4096
+    // blocks in CTR mode. The counter simply cannot be converted from an integer to a binary > 4096 due to lack of bits.
+
+    cout << " CTR Mode  pre-encryption blocks:\n";
+
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
     }
+    for (int i = 1; i <= encryption_rounds; i++) {
+        bitset<8> round_key = get_encryption_round_key(encryption_key, i);
+        if (encryption_blocks.size() > 4096) cout << "Warning! Light DES cannot support more that 4096 blocks in CTR mode" << endl;
+        for (int counter = 0; counter < encryption_blocks.size(); counter++) {
+            bitset<12> counter_bits(counter);
+            counter_bits = apply_des(counter_bits, round_key);
+            encryption_blocks[counter] = encryption_blocks[counter] ^= counter_bits;
+        }
+    }
+
+    cout << " post-encryption blocks:\n";
+
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
+    }
+    for (int i = 1; i <= encryption_rounds; i++) {
+        bitset<8> round_key = get_encryption_round_key(encryption_key, i);
+        if (encryption_blocks.size() > 4096) cout << "Warning! Light DES cannot support more that 4096 blocks in CTR mode" << endl;
+        for (int counter = 0; counter < encryption_blocks.size(); counter++) {
+            bitset<12> counter_bits(counter);
+            counter_bits = apply_des(counter_bits, round_key);
+            encryption_blocks[counter] = encryption_blocks[counter] ^= counter_bits;
+        }
+    }
+
+    cout << " decrypted blocks:\n";
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
+    }
+}
 
 
 
