@@ -20,25 +20,14 @@ vector<string> convert_string_to_binary(char *input, streampos file_content_size
     for (int i = 0; i < file_content_size; ++i) {
         // Make a temporary variable called B to store the 8 bit pattern
         // for the ASCII value.
+        for (int k = 0 ; k < 8; k++) {}
         bitset<8> b(input[i]);
-
         // Add that 8 bit pattern into the block.
         block.push_back(b.to_string());
     }
     return block;
 }
 
-// Generate random length long char string.
-char* generate_random_string(size_t length) {
-    char* random_string = (char*) malloc (length + 10);
-    if (random_string == NULL) exit (1);
-
-    for(int i = 0;i < length;i++) {
-        random_string[i] = rand() % 26 + 'a';
-    }
-    random_string[31] = '\0';
-    return random_string;
-}
 
 // Helper function to convert a binary number base 2 to base 10 decimal.
 long convert_binary_decimal(unsigned long bin_num) {
@@ -59,7 +48,7 @@ long convert_binary_decimal(unsigned long bin_num) {
 vector<bitset<12>> convert_binary_strings_to_blocks(vector<string> bit_strings) {
 vector<bitset<12>> encryption_blocks;
 int iterator = 0;
-while ((iterator + 2) < bit_strings.size()) {
+while (iterator + 2 < bit_strings.size()) {
 string bitstring_blk1 = bit_strings[iterator];
 string split_bit_string = bit_strings[++iterator];
 string bitstring_blk2 = bit_strings[++iterator];
@@ -69,7 +58,7 @@ bitset<12> block(bitstring_blk1.append(first_half_block));
 bitset<12> block2(second_half_block.append(bitstring_blk2));
 encryption_blocks.push_back(block);
 encryption_blocks.push_back(block2);
-iterator++;
+iterator = iterator + 1;
 }
 // Need to account for last few bits in bit string block, and zero pad blocks as appropriate.
 if ((bit_strings.size() - iterator) == 2) {
@@ -188,95 +177,123 @@ output << encryption_blocks[i];
 }
 
 // ECB basic block cipher mode
-void output_ecb(vector<bitset<12>> encryption_blocks, bitset<9> encryption_key, int encryption_rounds) {
+void output_ecb_enc(vector<bitset<12>> encryption_blocks, bitset<9> encryption_key, int encryption_rounds) {
+/*
 cout << " pre-encryption blocks:\n";
-output_to_file(encryption_blocks, "preencrypted-basic-encrypt.txt");
-for (int j = 0; j < encryption_blocks.size(); j++) {
-cout << encryption_blocks[j] << endl;
-}
+*/
+    output_to_file(encryption_blocks, "preencrypted-ecb.bin");
 
 // Encrypt the plaintext to ciphertext using the light DES algorithm.
-for (int i = 1; i <= encryption_rounds; i++) {
-bitset<8> round_key = get_round_key(encryption_key, i);
-for (int j = 0; j < encryption_blocks.size(); j++) {
-encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
+    for (int i = 1; i <= encryption_rounds; i++) {
+        bitset<8> round_key = get_round_key(encryption_key, i);
+        for (int j = 0; j < encryption_blocks.size(); j++) {
+            encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
+
+        }
+    }
+/*cout << " post-encryption blocks:\n";*/
+    output_to_file(encryption_blocks, "postencrypted-ecb.bin");
+
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
+    }
 
 }
-}
-cout << " post-encryption blocks:\n";
-output_to_file(encryption_blocks, "encrypted-basic-encrypt.txt");
-for (int j = 0; j < encryption_blocks.size(); j++) {
-cout << encryption_blocks[j] << endl;
-}
+void output_ecb_dec(vector<bitset<12>> encryption_blocks, bitset<9> encryption_key, int encryption_rounds) {
+    output_to_file(encryption_blocks, "predecrypted-ecb.bin");
 
-for (int i = encryption_rounds; i >= 1; i--) {
-bitset<8> round_key = get_round_key(encryption_key, i);
-cout << "decryption round key is " <<round_key << "\n";
-for (int j = 0; j < encryption_blocks.size(); j++) {
-encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
-}
-}
-cout << " post-decryption blocks:\n";
-output_to_file(encryption_blocks, "decrypted-basic-encrypt.txt");
-for (int j = 0; j < encryption_blocks.size(); j++) {
-cout << encryption_blocks[j] << endl;
-}
+
+    for (int i = encryption_rounds; i >= 1; i--) {
+        bitset<8> round_key = get_round_key(encryption_key, i);
+/*
+        cout << "decryption round key is " <<round_key << "\n";
+*/
+        for (int j = 0; j < encryption_blocks.size(); j++) {
+            encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
+        }
+/*cout << " post-decryption blocks:\n";*/
+        output_to_file(encryption_blocks, "postdecrypted-ecb.bin");
+
+        for (int j = 0; j < encryption_blocks.size(); j++) {
+            cout << encryption_blocks[j] << endl;
+        }
+    }
 }
 
 // CBC decryption
-void output_cbc(vector<bitset<12>> encryption_blocks, bitset<9> encryption_key, int encryption_rounds) {
+void output_cbc_enc(vector<bitset<12>> encryption_blocks, bitset<9> encryption_key, int encryption_rounds) {
     string INPUT;
     cout << "Please either enter an IV or enter NONCE to generate a nonce-generated IV" << endl;
     cin >> INPUT;
     vector<bitset<12>> nonce_block_vector;
     bitset<12> IV;
-    if (INPUT == "NONCE") { for (int i = 0; i < 12; i++)
-        {
-            IV[i] = rand()&1;
+    if (INPUT == "NONCE") {
+        for (int i = 0; i < 12; i++) {
+            IV[i] = rand() & 1;
 
-        };}
-    else {
+        };
+    } else {
         if (INPUT.find_first_not_of("01") != std::string::npos) {
             cout << "Illegal IV inputted, please input another IV, consisting wholly of binary digits" << endl;
-            exit (EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
 
         if (INPUT.length() != 12) {
             cout << "Please enter a valid binary IV of length 12" << endl;
-            exit (EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
     }
 /*
     cout << "Write down your IV as it is necessary for the decryption/encryption function. It is:" << endl;
 */
-    if (INPUT != "NONCE"){ IV = bitset<12>(INPUT); }
+    if (INPUT != "NONCE") { IV = bitset<12>(INPUT); }
     ofstream ofs("NONCE.txt");
     ofs << IV << endl;
     cout << "=====================" << endl;
 
-    cout << "pre-CBC-encryption blocks: \n";
+/*    cout << "pre-CBC-encryption blocks: \n";*/
     output_to_file(encryption_blocks, "preencrypted-cbc.txt");
 
-for (int j = 0; j < encryption_blocks.size(); j++) {
-cout << encryption_blocks[j] << endl;
-}
-for (int i = 1; i <= encryption_rounds; i++) {
-bitset<8> round_key = get_round_key(encryption_key, i);
-for (int j = 0; j < encryption_blocks.size(); j++) {
-if (j == 0) { encryption_blocks[j] = encryption_blocks[j] ^= IV;}
-else{
-encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j-1]; }
-encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
-}
-}
-
-cout << "post-CBC-encryption blocks: \n";
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
+    }
+    for (int i = 1; i <= encryption_rounds; i++) {
+        bitset<8> round_key = get_round_key(encryption_key, i);
+        for (int j = 0; j < encryption_blocks.size(); j++) {
+            if (j == 0) { encryption_blocks[j] = encryption_blocks[j] ^= IV; }
+            else {
+                encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j - 1];
+            }
+            encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
+        }
+    }
+    /*cout << "post-CBC-encryption blocks: \n";*/
 output_to_file(encryption_blocks, "encrypted-cbc.txt");
 for (int j = 0; j < encryption_blocks.size(); j++) {
 cout << encryption_blocks[j] << endl;
 }
+}
+void output_cbc_dec(vector<bitset<12>> encryption_blocks, bitset<9> encryption_key, int encryption_rounds) {
+    string INPUT;
+    cout << "Please enter the IV value used to encrypt the file:" << endl;
+    cin >> INPUT;
+    vector<bitset<12>> nonce_block_vector;
+    bitset<12> IV;
 
-for (int i = 1; i <= encryption_rounds; i++) {
+    if (INPUT.find_first_not_of("01") != std::string::npos) {
+        cout << "Illegal IV inputted, please input another IV, consisting wholly of binary digits" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    if (INPUT.length() != 12) {
+        cout << "Please enter a valid binary IV of length 12" << endl;
+        exit(EXIT_FAILURE);
+    }
+    IV = bitset<12>(INPUT);
+    cout << "=====================" << endl;
+
+
+for (int i = encryption_rounds; i >= 1; i--) {
 bitset<8> round_key = get_round_key(encryption_key, encryption_rounds - i + 1);
 for (int j = encryption_blocks.size() - 1; j >= 0; j--) {
 encryption_blocks[j] = apply_des(encryption_blocks[j], round_key);
@@ -287,7 +304,7 @@ encryption_blocks[j] = encryption_blocks[j] ^= encryption_blocks[j - 1];
 }
 }
 }
-cout << "post-CBC-decryption blocks: \n";
+/*cout << "post-CBC-decryption blocks: \n";*/
 output_to_file(encryption_blocks, "decrypted-cbc.txt");
 for (int j = 0; j < encryption_blocks.size(); j++) {
 cout << encryption_blocks[j] << endl;
@@ -297,66 +314,80 @@ cout << encryption_blocks[j] << endl;
 // CTR Encryption
 // Due to the Light DES encryption's very small block size of 12 bits, we cannot support file input of more that 4096
 // blocks in CTR mode. The counter simply cannot be converted from an integer to a binary > 4096 due to lack of bits.
-void output_ctr(vector<bitset<12>> encryption_blocks, bitset<9> encryption_key, int encryption_rounds) {
+void output_ctr_enc(vector<bitset<12>> encryption_blocks, bitset<9> encryption_key, int encryption_rounds) {
 
-cout << " CTR Mode  pre-encryption blocks:\n";
-output_to_file(encryption_blocks, "preencryption-ctr.txt");
+/*cout << " CTR Mode  pre-encryption blocks:\n";*/
+    output_to_file(encryption_blocks, "preencryption-ctr.txt");
 
-for (int j = 0; j < encryption_blocks.size(); j++) {
+    for (int i = 1; i <= encryption_rounds; i++) {
+        bitset<8> round_key = get_round_key(encryption_key, i);
+        if (encryption_blocks.size() > 4096)
+            cout << "Warning! Light DES cannot adequately support more that 4096 blocks in CTR mode" << endl;
+        for (int counter = 0; counter < encryption_blocks.size(); counter++) {
+            bitset<12> counter_bits(counter);
+            counter_bits = apply_des(counter_bits, round_key);
+            encryption_blocks[counter] = encryption_blocks[counter] ^= counter_bits;
+        }
+    }
+
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
+    }
+
+/*cout << " post-encryption blocks:\n";*/
+    output_to_file(encryption_blocks, "encrypted-ctr.txt");
+}
+void output_ctr_dec(vector<bitset<12>> encryption_blocks, bitset<9> encryption_key, int encryption_rounds) {
+
+/*for (int j = 0; j < encryption_blocks.size(); j++) {
 cout << encryption_blocks[j] << endl;
-}
-for (int i = 1; i <= encryption_rounds; i++) {
-bitset<8> round_key = get_round_key(encryption_key, i);
-if (encryption_blocks.size() > 4096) cout << "Warning! Light DES cannot support more that 4096 blocks in CTR mode" << endl;
-for (int counter = 0; counter < encryption_blocks.size(); counter++) {
-bitset<12> counter_bits(counter);
-counter_bits = apply_des(counter_bits, round_key);
-encryption_blocks[counter] = encryption_blocks[counter] ^= counter_bits;
-}
+}*/
+    for (int i = encryption_rounds; i >= 1; i--) {
+        bitset<8> round_key = get_round_key(encryption_key, i);
+        if (encryption_blocks.size() > 4096)
+            cout << "Warning! Light DES cannot adequately support more that 4096 blocks in CTR mode" << endl;
+        for (int counter = 0; counter < encryption_blocks.size(); counter++) {
+            bitset<12> counter_bits(counter);
+            counter_bits = apply_des(counter_bits, round_key);
+            encryption_blocks[counter] = encryption_blocks[counter] ^= counter_bits;
+        }
+    }
+    output_to_file(encryption_blocks, "decrypted-ctr.txt");
+
+    for (int j = 0; j < encryption_blocks.size(); j++) {
+        cout << encryption_blocks[j] << endl;
+    }
+
+
 }
 
-cout << " post-encryption blocks:\n";
-output_to_file(encryption_blocks, "encrypted-ctr.txt");
-
-
-for (int j = 0; j < encryption_blocks.size(); j++) {
-cout << encryption_blocks[j] << endl;
-}
-for (int i = 1; i <= encryption_rounds; i++) {
-bitset<8> round_key = get_round_key(encryption_key, i);
-if (encryption_blocks.size() > 4096) cout << "Warning! Light DES cannot support more that 4096 blocks in CTR mode" << endl;
-for (int counter = 0; counter < encryption_blocks.size(); counter++) {
-bitset<12> counter_bits(counter);
-counter_bits = apply_des(counter_bits, round_key);
-encryption_blocks[counter] = encryption_blocks[counter] ^= counter_bits;
-}
-}
-cout << " decrypted blocks:\n";
-for (int j = 0; j < encryption_blocks.size(); j++) {
-cout << encryption_blocks[j] << endl;
-}
-output_to_file(encryption_blocks, "decrypted-ctr.txt");
-}
 
 int main(int argc, char *argv[]) {
 
-    srand(time(NULL) );
+    srand(time(NULL));
     vector<string> bit_strings;
     vector<bitset<12>> encryption_blocks;
     vector<bitset<12>> IV;
 
 
-
-    if (argc != 5) {
-        cout << "Incorrect number of arguments sent the program, needs a cipher encryption mode, a file name pointing to plaintext, a key of length 9 for encryption(in binary format), and number of rounds of encryption to perform." << endl;
-        cout << "Example arguments: --ECB testfile 111000111 3" << endl;
+    if (argc != 6) {
+        cout
+                << "Incorrect number of arguments sent the program, needs a cipher encryption mode, a file name pointing to plaintext, a key of length 9 for encryption(in binary format), and number of rounds of encryption to perform."
+                << endl;
+        cout << "Example arguments: --ECB --enc testfile 111000111 3" << endl;
         return 1;
     }
 
     string cipher_mode = argv[1];
-    string filename =  argv[2];
-    string key = argv[3];
-    int encryption_rounds = atoi(argv[4]);
+    string option = argv[2];
+    if (option != "--enc" && option != "--dec") {
+        cout << "Return a valid option for your cipher; either --enc or --dec." << endl;
+        exit(EXIT_FAILURE);
+    }
+    string filename = argv[3];
+    string key = argv[4];
+    int encryption_rounds = atoi(argv[5]);
+
     if (key.find_first_not_of("01") != std::string::npos) {
         cout << "Illegal key inputted, please input another key, consisting wholly of binary digits" << endl;
         return 1;
@@ -370,15 +401,15 @@ int main(int argc, char *argv[]) {
 
 
 
-    ifstream file (filename, ios::in|ios::binary|ios::ate);
+    ifstream file(filename, ios::in | ios::binary | ios::ate);
     streampos file_content_size;
-    char * file_contents;
+    char *file_contents;
 
     if (file.is_open()) {
         file_content_size = file.tellg();
-        file_contents = new char [file_content_size];
-        file.seekg (0, ios::beg);
-        file.read (file_contents, file_content_size);
+        file_contents = new char[file_content_size];
+        file.seekg(0, ios::beg);
+        file.read(file_contents, file_content_size);
         file.close();
     } else {
         cout << "Unable to open file, please provide an existing file as an argument.";
@@ -386,16 +417,29 @@ int main(int argc, char *argv[]) {
     }
     encryption_blocks = convert_binary_strings_to_blocks(convert_string_to_binary(file_contents, file_content_size));
     if (cipher_mode == "--ECB") {
-        output_ecb(encryption_blocks, encryption_key, encryption_rounds);
+        if (option == "--enc") {
+            output_ecb_enc(encryption_blocks, encryption_key, encryption_rounds);
+        } else if (option == "--dec") {
+            output_ecb_dec(encryption_blocks, encryption_key, encryption_rounds);
+        }
     } else if (cipher_mode == "--CBC") {
-        output_cbc(encryption_blocks, encryption_key, encryption_rounds);
+        if (option == "--enc") {
+            output_cbc_enc(encryption_blocks, encryption_key, encryption_rounds);
+        } else if (option == "--dec") { output_cbc_dec(encryption_blocks, encryption_key, encryption_rounds); }
     } else if (cipher_mode == "--CTR") {
-        output_ctr(encryption_blocks, encryption_key, encryption_rounds);
+        if (option == "--enc") {
+            output_ctr_enc(encryption_blocks, encryption_key, encryption_rounds);
+        } else if (option == "--dec") { output_ctr_dec(encryption_blocks, encryption_key, encryption_rounds); }
     } else {
-        cout << "Invalid cipher block mode, please try again" << endl;
+        cout << "Invalid cipher block mode, please try again" <<
+             endl;
         return 1;
     }
 }
+
+
+
+
 
 
 
