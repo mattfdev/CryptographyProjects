@@ -163,7 +163,7 @@ int main(int argc, char* argv[]) {
         // Obtain the secret key
 
         // TODO 3:get the public key into the BIGNUM buffer pub_key_theirs (what might correspond to BN_bn2bin ?)
-	
+	BN_bn2bin(pub_key, pub_key_theirs);
         // TODO 4: compute the secret key from our DH structure and the other party public key
         // return the length in the integer n, although we expect it to be PUB_KEY_LEN
 
@@ -183,5 +183,3 @@ int main(int argc, char* argv[]) {
     }
 
 }
-
-
