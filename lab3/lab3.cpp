@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
     int encryption_rounds = atoi(argv[3]);
     if (key.find_first_not_of("01") != std::string::npos) {
         cout << "Illegal key inputted, please input another key, consisting wholly of binary digits" << endl;
-        return false;
+        return 1;
     }
 
     if (key.length() != 9) {
