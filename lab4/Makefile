@@ -1,6 +1,6 @@
 all:
-	gcc -L/usr/local/lib -lcrypto dhe.c -o dhe
-	gcc -L/usr/local/lib -lcrypto dhe_server.c -o dhe_server
+	gcc dhe.c -lcrypto -o dhe
+	gcc dhe_server.c -lcrypto -o dhe_server
 
 start_client:
 	./dhe
