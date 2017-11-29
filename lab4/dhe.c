@@ -67,7 +67,8 @@ void my_receive(int sockfd, char * buffer, int length) {
 int main(int argc, char* argv[]) {
     int opt = 0;
     int ret = 0;
-    int k, n, len;
+    int k, n;
+    ssize_t len;
     int file_fd;
     int file_size;
     int total = 0;
@@ -108,9 +109,11 @@ int main(int argc, char* argv[]) {
     // Check the function DH_generate_key
     // See documentation at:
     // https://www.openssl.org/docs/man1.1.0/crypto/
-
+    DH_generate_key(tdh);
     // TODO 2: obtain the public and private keys in the BIGNUM structs
     // pub_key and priv_key. Check what methods (DH_get..) may help you do that
+    pub_key = tdh->pub_key;
+    priv_key = tdh->priv_key;
 
     // Export public key to binary and print it
     n =  BN_num_bytes(pub_key);
@@ -165,6 +168,7 @@ int main(int argc, char* argv[]) {
     // Obtain the secret key
 
     // TODO 3:get the public key into the BIGNUM buffer pub_key_theirs (what might correspond to BN_bn2bin ?)
+    pub_key_theirs = malloc(sizeof(BIGNUM));
     BN_bin2bn(buf_pubkey_theirs, PUB_KEY_LEN, pub_key_theirs);
     // TODO 4: compute the secret key from our DH structure and the other party public key
     // return the length in the integer n, although we expect it to be PUB_KEY_LEN
