@@ -14,7 +14,9 @@ add_executable(lab3 ${SOURCE_FILES} lab3/lab3.cpp lab3/lab3.cpp)
 
 add_executable(dhe ${SOURCE_FILES} lab4/dhe.c lab4/dhe.c)
 add_executable(dhe_server ${SOURCE_FILES} lab4/dhe_server.c lab4/dhe_server.c)
+add_executable(merkle ${SOURCE_FILES} lab4/merkle.c lab4/merkle.c)
 
 
 target_link_libraries(dhe ${OPENSSL_LIBRARIES})
 target_link_libraries(dhe_server ${OPENSSL_LIBRARIES})
+target_link_libraries(merkle ${OPENSSL_LIBRARIES})
