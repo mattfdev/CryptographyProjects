@@ -43,11 +43,11 @@ unsigned char** gen_puzzles() {
         ciphertext[i] = (unsigned char *)malloc (17 * sizeof (char));
         // Create 16bit long string of key.
         if (i < 10) {
-            snprintf(identifier,17,"%s%d\0","000000000000000",i);
+            snprintf(identifier,17,"%s%d%c","000000000000000",i,'\0');
         } else {
             int dig1 = i / 10;
             int dig2 = i % 10;
-            snprintf(identifier,17,"%s%d%d\0","00000000000000",dig1,dig2);
+            snprintf(identifier,17,"%s%d%d%c","00000000000000",dig1,dig2,'\0');
         }
         unsigned char* plaintext = malloc(num_of_keys * sizeof (char));
         snprintf(plaintext,num_of_keys,"%s%d%d","puzzle",i,secret_array[i]);
