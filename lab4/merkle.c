@@ -61,7 +61,7 @@ unsigned char** gen_puzzles() {
 int solve_puzzle(unsigned char** puzzles) {
     // Choose a random puzzle to solve.
     int puzzle_to_solve = rand() % 32;
-    unsigned char* puzzle = puzzles[15];
+    unsigned char* puzzle = puzzles[puzzle_to_solve];
     unsigned char* plaintext = malloc(sizeof(char) * 32);
     int outlen1;
     unsigned char* key = malloc(sizeof(char) * 17);
@@ -98,7 +98,6 @@ int main(int argc, char const *argv[]) {
     char* bob_key;
     /* Alice generates some puzzles */
     alice_keys = gen_puzzles();
-    printf("%s \n", alice_keys[15]);
     /* Bob solves one random puzzle and discovers the secret */
     int x = solve_puzzle(alice_keys);
     //printf("Bob’s Secret key %s \n", bob_key[0]);
