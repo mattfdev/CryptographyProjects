@@ -61,7 +61,7 @@ unsigned char** gen_puzzles() {
 int solve_puzzle(unsigned char** puzzles) {
     // Choose a random puzzle to solve.
     int puzzle_to_solve = rand() % 32;
-    unsigned char* puzzle = puzzles[puzzle_to_solve];
+    unsigned char* puzzle = puzzles[15];
     unsigned char* plaintext = malloc(sizeof(char) * 32);
     int outlen1;
     unsigned char* key = malloc(sizeof(char) * 17);
@@ -73,11 +73,11 @@ int solve_puzzle(unsigned char** puzzles) {
             int dig2 = i % 10;
             snprintf(key,17,"%s%d%d%c","00000000000000",dig1,dig2,'\0');
         }
-        printf("%s\n", key);
+/*        printf("%s\n", key);*/
         EVP_CIPHER_CTX ctx;
         EVP_DecryptInit(&ctx, EVP_aes_128_ecb(), key, NULL);
-        EVP_DecryptUpdate(&ctx, plaintext, &outlen1, puzzle, sizeof(puzzle));
-        EVP_DecryptFinal(&ctx, plaintext + outlen1, &outlen1);
+        EVP_DecryptUpdate(&ctx, plaintext, &outlen1, puzzle, 16 + sizeof(puzzle));
+        EVP_DecryptFinal(&ctx, plaintext + 16, &outlen1);
         printf("%s\n", plaintext);
     }
     return 0;
