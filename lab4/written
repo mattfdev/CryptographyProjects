@@ -1,3 +1,13 @@
 Lab 4
 
-Suppose Bob solves the puzzle at index j of the puzzle array P. According to the way that the protocol is described, Bob would communicate j in clear-text back to Alice over an insecure communication channel. Eve would then be able to intercept j and decrypt the j'th puzzle with the key 0...0j. It ought to be the case that Bob communicates encrypt(secret_j,j) instead of j. This way, instead of Eve simply brute-forcing P[j], she does not know which index is encrypted, thus necessitating a brute-force on every index and then encrypting the index with the found key until she happens to find the one that Bob communicated to Alice. Because Bob picked a number at random, he only needs to brute-force one index.
+Suppose Bob solves the puzzle at index j of the puzzle array P. According to the way that the protocol is described,
+Bob would communicate j in clear-text back to Alice over an insecure communication channel.
+Eve would then be able to intercept j and decrypt the j'th puzzle with the key 0...0j. It ought to be the case that Bob
+communicates encrypt(secret_j,j) instead of j. This way, instead of Eve simply brute-forcing P[j], she does not
+know which index is encrypted, thus necessitating a brute-force on every index and then encrypting the index with
+the found key until she happens to find the one that Bob communicated to Alice. Because Bob picked a number at random,
+he only needs to brute-force one index.
+
+The key here is that Bob has to brute force significantly less digits than Eve does to find the key. For less important,
+or time dependant messages, this encryption scheme significantly reduces the risk of information turnover, or atleast
+reduces the value of the message.
