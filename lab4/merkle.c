@@ -58,6 +58,30 @@ unsigned char** gen_puzzles() {
     }
     return ciphertext;
 }
+int solve_puzzle(unsigned char** puzzles) {
+    // Choose a random puzzle to solve.
+    int puzzle_to_solve = rand() % 32;
+    unsigned char* puzzle = puzzles[puzzle_to_solve];
+    unsigned char* plaintext = malloc(sizeof(char) * 32);
+    int outlen1;
+    unsigned char* key = malloc(sizeof(char) * 17);
+    for (int i = 0; i < 32; i++) {
+        if (i < 10) {
+            snprintf(key,17,"%s%d%c","00000000000000",i,'\0');
+        } else {
+            int dig1 = i / 10;
+            int dig2 = i % 10;
+            snprintf(key,17,"%s%d%d%c","00000000000000",dig1,dig2,'\0');
+        }
+        //printf("%s\n", key);
+        EVP_CIPHER_CTX ctx;
+        EVP_DecryptInit_ex(&ctx, EVP_aes_128_ecb(), NULL, key, NULL);
+        EVP_DecryptUpdate(&ctx, plaintext, &outlen1, puzzle, sizeof(puzzle));
+        EVP_DecryptFinal(&ctx, plaintext + outlen1, &outlen1);
+        //printf("%s\n", plaintext);
+    }
+    return 0;
+}
 /* gen_puzzles ()
  *
 This is Alice . She generates 2^16 random keys and 2^16 puzzles . A puzzle has the following formula :
@@ -76,7 +100,7 @@ int main(int argc, char const *argv[]) {
     alice_keys = gen_puzzles();
     printf("%s \n", alice_keys[15]);
     /* Bob solves one random puzzle and discovers the secret */
-    //x = solve_puzzle(puzzles);
+    int x = solve_puzzle(alice_keys);
     //printf("Bob’s Secret key %s \n", bob_key[0]);
     //printf("Alice’s secret key: %s \n", alice_keys[x]);
     //if (bob_key[0] == alice_keys[])
