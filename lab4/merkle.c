@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+
 // **************************** Functions ****************************
 /* ======================= Encryption ======================= */
 /*
@@ -42,20 +43,26 @@ unsigned char** gen_puzzles() {
         unsigned char identifier[17];
         ciphertext[i] = (unsigned char *)malloc (17 * sizeof (char));
         // Create 16bit long string of key.
-        if (i < 10) {
+/*        if (i < 10) {
             snprintf(identifier,17,"%s%d%c","000000000000000",i,'\0');
-        } else {
+        } else {*/
             int dig1 = i / 10;
             int dig2 = i % 10;
             snprintf(identifier,17,"%s%d%d%c","00000000000000",dig1,dig2,'\0');
-        }
+/*        }*/
         unsigned char* plaintext = malloc(num_of_keys * sizeof (char));
         snprintf(plaintext,num_of_keys,"%s%d%d","puzzle",i,secret_array[i]);
+        ciphertext[i] = plaintext;
         EVP_CIPHER_CTX ctx;
         EVP_EncryptInit(&ctx, EVP_aes_128_ecb(), identifier, NULL);
         EVP_EncryptUpdate(&ctx, ciphertext[i], &outlen1, plaintext, sizeof(plaintext));
         EVP_EncryptFinal(&ctx, ciphertext[i] + outlen1, &outlen2);
     }
+    FILE * alice_secret;
+    alice_secret = fopen("alice_secret.txt","a+");
+    for (int i=0; i<32; i++)
+        fprintf(alice_secret,"%i\n",secret_array[i]);
+    fclose(alice_secret);
     return ciphertext;
 }
 int solve_puzzle(unsigned char** puzzles) {
@@ -66,21 +73,38 @@ int solve_puzzle(unsigned char** puzzles) {
     int outlen1;
     unsigned char* key = malloc(sizeof(char) * 17);
     for (int i = 0; i < 32; i++) {
-        if (i < 10) {
+/*        if (i < 10) {
             snprintf(key,17,"%s%d%c","00000000000000",i,'\0');
-        } else {
+        } else {*/
             int dig1 = i / 10;
             int dig2 = i % 10;
             snprintf(key,17,"%s%d%d%c","00000000000000",dig1,dig2,'\0');
-        }
+/*        }*/
 /*        printf("%s\n", key);*/
         EVP_CIPHER_CTX ctx;
         EVP_DecryptInit(&ctx, EVP_aes_128_ecb(), key, NULL);
-        EVP_DecryptUpdate(&ctx, plaintext, &outlen1, puzzle, 16 + sizeof(puzzle));
-        EVP_DecryptFinal(&ctx, plaintext + 16, &outlen1);
-        printf("%s\n", plaintext);
+/*        if (i > 10 ) {*/
+	    int u = (unsigned)strlen(plaintext);
+            EVP_DecryptUpdate(&ctx, plaintext, &outlen1, puzzle, strlen(puzzle));
+            EVP_DecryptFinal(&ctx, plaintext, &outlen1);
+/*        printf("%s\n", plaintext);
+        printf("%s\n", puzzle);*/
+
+/*        }*/
+/*        else {
+                EVP_Decryp/*        printf("%s\n", plaintext);
+        printf("%s\n", puzzle);*/tUpdate(&ctx, plaintext, &outlen1, puzzle, 15 + sizeof(puzzle));
+                EVP_DecryptFinal(&ctx, plaintext + 15, &outlen1);
+        }*/
+        if (strstr(plaintext, "puzzle") != NULL) {
+            FILE * bob_key;
+            bob_key = fopen("bob_key.txt","a+");
+            fprintf(bob_key,"%s\n",puzzle);
+            fclose(bob_key);
+            printf("%s", plaintext);
+        }
     }
-    return 0;
+    return puzzle_to_solve;
 }
 /* gen_puzzles ()
  *
@@ -100,6 +124,7 @@ int main(int argc, char const *argv[]) {
     alice_keys = gen_puzzles();
     /* Bob solves one random puzzle and discovers the secret */
     int x = solve_puzzle(alice_keys);
+    printf("The puzzle solved is at index %i \n", x);
     //printf("Bob’s Secret key %s \n", bob_key[0]);
     //printf("Alice’s secret key: %s \n", alice_keys[x]);
     //if (bob_key[0] == alice_keys[])
