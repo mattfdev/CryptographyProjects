@@ -73,12 +73,12 @@ int solve_puzzle(unsigned char** puzzles) {
             int dig2 = i % 10;
             snprintf(key,17,"%s%d%d%c","00000000000000",dig1,dig2,'\0');
         }
-        //printf("%s\n", key);
+        printf("%s\n", key);
         EVP_CIPHER_CTX ctx;
-        EVP_DecryptInit_ex(&ctx, EVP_aes_128_ecb(), NULL, key, NULL);
+        EVP_DecryptInit(&ctx, EVP_aes_128_ecb(), key, NULL);
         EVP_DecryptUpdate(&ctx, plaintext, &outlen1, puzzle, sizeof(puzzle));
         EVP_DecryptFinal(&ctx, plaintext + outlen1, &outlen1);
-        //printf("%s\n", plaintext);
+        printf("%s\n", plaintext);
     }
     return 0;
 }
