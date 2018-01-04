@@ -9,5 +9,7 @@ Various cryptology projects made for university course CPS713 Applied Cryptology
 - Utilize OpenSSL library to utilize public/private key encrptions on a file, and demonstrate the usage of diffrent block cipher algorithms (ECB, CBC, CFB, and CTR)
 
 Contributions by:
+
 Matthew Francis (mattfdev)
+
 Reaz Huq (rhuq92)
