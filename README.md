@@ -11,5 +11,4 @@ Various cryptology projects made for university course CPS713 Applied Cryptology
 Contributions by:
 
 Matthew Francis (mattfdev)
-
 Reaz Huq (rhuq92)
